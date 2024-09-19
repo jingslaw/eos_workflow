@@ -23,7 +23,6 @@ dependencies = [
   "atomate2",
   "ase",
   "jedi==0.18.2",
-  "paramiko==2.7.2",
 ]
 
 [project.optional-dependencies]
