@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eos_workflow"
+version = "0.1.0"
+description = "A workflow of EOS calculations"
+readme = "README.rst"
+authors = [
+  {name = "Weiguo Jing", email = "jingslaw163@gmail.com"}
+]
+maintainers = [
+  {name = "Weiguo Jing", email = "jingslaw163@gmail.com"}
+]
+classifiers = [
+
+]
+license = {text = "MIT license"}
+dependencies = [
+  "typer",
+  "abipy @ git+https://github.com/abinit/abipy.git@develop",
+  "atomate2",
+  "ase",
+  "jedi==0.18.2",
+  "paramiko==2.7.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",  # testing
+    "mypy",  # linting
+    "pytest",  # testing
+    "ruff"  # linting
+]
+
+[project.urls]
+
+bugs = "https://github.com/jingslaw/eos_workflow/issues"
+changelog = "https://github.com/jingslaw/eos_workflow/blob/master/changelog.md"
+homepage = "https://github.com/jingslaw/eos_workflow"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+
+
+
+# Mypy
+# ----
+
+[tool.mypy]
+files = "."
+
+# Use strict defaults
+strict = true
+warn_unreachable = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+# Don't require test functions to include types
+module = "tests.*"
+allow_untyped_defs = true
+disable_error_code = "attr-defined"
+
