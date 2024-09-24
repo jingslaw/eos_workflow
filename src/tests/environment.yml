@@ -49,6 +49,7 @@ dependencies:
       - invoke==2.2.0
       - ipython==8.27.0
       - jedi==0.18.2
+      - jobflow==0.1.18
       - jobflow-remote==0.1.4
       - kiwisolver==1.4.7
       - matplotlib==3.9.2

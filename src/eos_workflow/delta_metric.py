@@ -160,9 +160,10 @@ def metric_analyze(element, configuration, v0, b0, b1, natoms):
 
     conf_key is key in json file for configurations of every element.
     """
+    if configuration == "DC":
+        configuration = "Diamond"
     if configuration == "RE":
         assert element in LANTHANIDE_ELEMENTS
-
         ref_json = "WIEN2K_LANN.json"
         conf_key = f"{element}N"
     elif configuration == "GS":

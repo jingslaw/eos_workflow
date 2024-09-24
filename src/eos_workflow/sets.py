@@ -6,7 +6,7 @@ from ase import io
 from abipy.abio.input_tags import SCF
 from atomate2.abinit.jobs.core import StaticMaker
 from atomate2.abinit.sets.core import StaticSetGenerator
-from atomate2.abinit.sets.base import AbinitInputGenerator
+from atomate2.abinit.sets.base import AbinitInputGenerator, as_pseudo_table
 from pymatgen.io.abinit.abiobjects import KSampling
 from pymatgen.io.ase import AseAtomsAdaptor
 from math import ceil
@@ -16,7 +16,6 @@ from eos_workflow.utilities import (
     ATOM_NUMBERS_IN_CONFIG,
     UNARIE_CONFIGURATIONS,
     OXIDE_CONFIGURATIONS,
-    OncvpspInput
 )
 
 EOS_PREV_OUTPUTS_DEPS = (f"{SCF}:WFK",)
@@ -36,40 +35,33 @@ class EosMaker(StaticMaker):
 
 
 def nband_calculation(element, configuration, pseudos):
-    nband = 0
     numbers = ATOM_NUMBERS_IN_CONFIG[configuration]
-    if isinstance(pseudos, str):
-        pseudos = [pseudos]
-    pps = [OncvpspInput(file_path=pseudo) for pseudo in pseudos]
-    elements = [pp.basic_setting["atsym"] for pp in pps]
-    ven = [pp.valence_electron_numbers for pp in pps]
-    if element not in elements:
-        print(f"ERROR: Pseudos list {elements} does not have pseudos of element {element} ")
+    pseudos = as_pseudo_table(pseudos)
+    try:
+        pps = pseudos.pseudo_with_symbol(element)
+    except AttributeError:
+        print(f"ERROR: PseudoTable does not have pseudos of element {element} ")
         exit(-1)
-    if configuration in UNARIE_CONFIGURATIONS:
-        i = elements.index(element)
-        nbnd = ceil(ven[i] * numbers[0] / 2)
-        nband += max(ceil(nbnd * 1.2), nbnd + 4)
-    else:
-        if 'O' not in elements:
-            print(f"ERROR: oxides {configuration} does not have pseudos of O ")
+    nband = pps.Z_val * numbers[0] / 2
+    if configuration in OXIDE_CONFIGURATIONS:
+        try:
+            pps = pseudos.pseudo_with_symbol('O')
+        except AttributeError:
+            print(f"ERROR: PseudoTable does not have pseudos of element O ")
             exit(-1)
-        i = elements.index(element)
-        nband += ven[i] * numbers[0]
-        i = elements.index('O')
-        nband += ven[i] * numbers[1]
-        nband = ceil(nband / 2)
-    return nband
+        nband += pps.Z_val * numbers[1] / 2
+    return ceil(nband)
 
 
 def eos_input_generation(element, configuration, ecut, pseudos, precision='standard'):
+    nband = nband_calculation(element, configuration, pseudos)
     if element in ELEMENTS_INCLUDE_F_ELECTRONS:
         if configuration in UNARIE_CONFIGURATIONS:
             nband = 20
         else:
-            nband = ceil(1.5 * nband_calculation(element, configuration, pseudos))
+            nband = ceil(1.5 * nband)
     else:
-        nband = nband_calculation(element, configuration, pseudos)
+        nband = ceil(max(1.2 * nband, nband + 4))
     numbers = ATOM_NUMBERS_IN_CONFIG[configuration]
     natom = sum(numbers)
     if precision == 'standard':

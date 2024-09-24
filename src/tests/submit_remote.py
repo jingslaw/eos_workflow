@@ -1,14 +1,15 @@
 from eos_workflow.eos_workflow import eos_workflow
-from jobflow_remote import submit_flow
+from jobflow_remote import submit_flow, set_run_config
+from jobflow import Flow, run_locally
+from pymatgen.io.abinit.pseudos import PseudoParser
+from atomate2.abinit.sets.base import AbinitInputGenerator, as_pseudo_table
 
 if __name__ == "__main__":
     ecut = 38
-    element = 'O'
-    configuration = 'BCC'
-    oxygen = "O.psp8"
-    pseudo_files = [oxygen]
+    element = 'Li'
+    configuration = 'XO2'
+    pseudos = "ONCVPSP-PBE-SR-PDv0.4:standard"
 
-    eos = eos_workflow(element, configuration, ecut, pseudo_files, precision="test")
-
+    eos = eos_workflow(element, configuration, ecut, pseudos, precision="test")
     result = submit_flow(eos)
     print(result)
