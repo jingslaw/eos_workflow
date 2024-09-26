@@ -1,0 +1,4 @@
+from atomate2 import SETTINGS
+
+print(SETTINGS.ABINIT_MAX_RESTARTS)
+print(SETTINGS.CONFIG_FILE)

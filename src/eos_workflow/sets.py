@@ -65,9 +65,26 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
     numbers = ATOM_NUMBERS_IN_CONFIG[configuration]
     natom = sum(numbers)
     if precision == 'standard':
-        eos_settings = {"ecut": ecut, "nband": nband, "tsmear": 2.25e-3, "nstep": 100, "toldfe": 5.0e-11 * natom}
+        eos_settings = {
+            "ecut": ecut,
+            "nband": nband,
+            "tsmear": 2.25e-3,
+            "nstep": 100,
+            "tolvrs": 5.0e-11 * natom,
+            "chkprim": 0,
+            "chksymbreak": 0,
+            "autoparal": 1,
+            "optcell": 0,
+            "ionmov": 22,
+            "dilatmx": 1.0,
+            "ecutsm": 0.0,
+            "occopt": 3,
+            "nspinor": 1,
+            "nsppol": 1,
+            "nspden": 1,
+        }
     else:
-        eos_settings = {"ecut": ecut, "nband": nband}
+        eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100}
     return eos_settings
 
 

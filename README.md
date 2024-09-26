@@ -74,7 +74,6 @@ open ~/.bashrc and add the following:
 ```
 export ATOMATE2_CONFIG_FILE="PATH_TO/atomate2.yaml"
 export JOBFLOW_CONFIG_FILE="PATH_TO/jobflow.yaml"
-export EOS_PSEUDO_PATH="PATH_TO/PSEUDO_FOLDER"
 ```
 
 then:
@@ -98,7 +97,10 @@ pip install -e .
 ```
 
 ## An Example for O.psp8
-An example is in eos_workflow/src/tests/
+An example is in eos_workflow/src/tests/ \
+pseudo O.psp8 is from "ONCVPSP-PBE-SR-PDv0.4:standard", a standard
+PseudoTable, which installed in abipy:
+~/.abinit/pseudo/ONCVPSP-PBE-SR-PD/standard
 
 ### run locally
 ```

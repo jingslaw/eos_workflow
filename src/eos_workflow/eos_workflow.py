@@ -214,7 +214,8 @@ def wfk_calculations(
         check_job = eos_check(series_eos_job.output)
         compare_job = series_vs_parallel_results(check_job.output, volume_energy_result)
         series_eos_flow = [series_eos_job, check_job, compare_job]
-        return Response(compare_job.output, addition=series_eos_flow)
+        flow = Flow(series_eos_flow, output=compare_job.output)
+        return Response(flow.output, addition=flow)
 
 
 @job
@@ -288,6 +289,6 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
         volume_scaling_list=volume_scaling_list.copy()
     )
     eos_jobflow.append(wfk_job)
-    delta_job = eos_delta_calculation(element, configuration, check_job.output)
+    delta_job = eos_delta_calculation(element, configuration, wfk_job.output)
     eos_jobflow.append(delta_job)
     return eos_jobflow
