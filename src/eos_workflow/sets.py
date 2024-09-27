@@ -83,6 +83,8 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nsppol": 1,
             "nspden": 1,
         }
+    elif precision == "debug":
+        eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "tsmear": 2.25e-3, "toldfe": 5.0e-11 * natom}
     else:
         eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100}
     return eos_settings

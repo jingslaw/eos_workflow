@@ -5,11 +5,11 @@ from pymatgen.io.abinit.pseudos import PseudoParser
 from atomate2.abinit.sets.base import AbinitInputGenerator, as_pseudo_table
 
 if __name__ == "__main__":
-    ecut = 50
+    ecut = 20
     element = 'O'
     configuration = 'BCC'
     pseudos = "ONCVPSP-PBE-SR-PDv0.4:standard"
 
-    eos = eos_workflow(element, configuration, ecut, pseudos, precision="standard")
+    eos = eos_workflow(element, configuration, ecut, pseudos, precision="debug")
     result = submit_flow(eos)
     print(result)
