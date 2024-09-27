@@ -20,7 +20,6 @@ ABINIT_CMD: PATH_TO/src/98_main/abinit
 ABINIT_MRGDDB_CMD: PATH_TO/src/98_main/mrgddb
 ABINIT_ANADDB_CMD: PATH_TO/src/98_main/anaddb
 ABINIT_ABIPY_MANAGER_FILE: $HOME/.abinit/abipy/manager.yml
-ABINIT_MAX_RESTARTS: 1
 ```
 
 jobflow.yaml
