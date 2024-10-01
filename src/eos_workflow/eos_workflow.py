@@ -215,7 +215,7 @@ def wfk_calculations(
         compare_job = series_vs_parallel_results(check_job.output, volume_energy_result)
         series_eos_flow = [series_eos_job, check_job, compare_job]
         flow = Flow(series_eos_flow, output=compare_job.output)
-        return Response(flow.output, addition=flow)
+        return Response(replace=flow)
 
 
 @job
