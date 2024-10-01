@@ -40,10 +40,10 @@ ALL_ELEMENTS = [
 ELEMENTS_INCLUDE_F_ELECTRONS = LANTHANIDE_ELEMENTS + ACTINIDE_ELEMENTS
 
 OXIDE_CONFIGURATIONS = ["XO", "XO2", "XO3", "X2O", "X2O3", "X2O5"]
-UNARIE_CONFIGURATIONS = ["BCC", "FCC", "SC", "DC"]
+UNARIE_CONFIGURATIONS = ["BCC", "FCC", "SC", "Diamond"]
 ACWF_CONFIGURATIONS = OXIDE_CONFIGURATIONS + UNARIE_CONFIGURATIONS
 
-ATOM_NUMBERS_IN_CONFIG = {'FCC': (1, ), 'BCC': (1, ), 'SC': (1, ), "DC": (2, ),
+ATOM_NUMBERS_IN_CONFIG = {'FCC': (1, ), 'BCC': (1, ), 'SC': (1, ), "Diamond": (2, ),
                           "X2O": (2, 1), "XO": (1, 1), "X2O3": (4, 6), "XO2": (1, 2), "X2O5": (4, 10), "XO3": (1, 3)
                           }
 
