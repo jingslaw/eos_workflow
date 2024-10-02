@@ -1,4 +1,5 @@
 import os
+import json
 from copy import deepcopy
 from dataclasses import dataclass, field
 
@@ -236,9 +237,11 @@ def eos_delta_calculation(element, configuration, volume_energy_results):
         num = volume_energy_results["num_of_atoms"]
         eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
         print(eos_results)
-        return eos_results
     else:
-        return {}
+        eos_results = {}
+    with open("eos_fitting_results.json", 'w') as fp:
+        json.dump(eos_results, fp, indent=4)
+    return eos_results
 
 
 @job
