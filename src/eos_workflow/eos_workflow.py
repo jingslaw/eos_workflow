@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from atomate2.abinit.jobs.core import StaticMaker
@@ -163,12 +164,14 @@ def eos_check(eos_jobs_outputs):
         fitting_results = birch_murnaghan_fit(volume_energy)
         residuals0 = fitting_results["residuals0"]
         if residuals0 > 0.005:
-            # 0.005 means coefficient of determination: R^2 > 0.995, which means fitting is pretty good.
+            # < 0.005 corresponds to the coefficient of determination: R^2 > 0.995, which means fitting is pretty good.
             eos_log += "\nWARNING: The behavior of eos curve is bad.\n"
             print("\nWARNING: The behavior of eos curve is bad.\n")
             flag = False
             volume_energy.update({"eos_is_converged": flag, "eos_failed_problems": eos_log})
-    print(volume_energy)
+    tmp = deepcopy(volume_energy)
+    tmp.pop("minimum_eos_result")
+    print(tmp)
     return volume_energy
 
 
@@ -182,10 +185,11 @@ def series_vs_parallel_results(series_results, parallel_results):
             energy_p = parallel_results["energies"][j]
             if (energy - energy_p) > 0.0001:
                 # 0.0001 could be replaced to the value of toldfe, which is better need further test for all pps.
-                series_results["eos_failed_problems"] += (f"\nEtot at scaling_factor={eta} in series eos calculation"
-                                                          f"is larger than corresponding Etot at parallel calculation."
-                                                          f"The start point for series eos calculations might be"
-                                                          f"meta-stable states above the ground state.\n")
+                series_results["eos_failed_problems"] += \
+                    (f"\nEtot at scaling_factor={eta} in series eos calculation"
+                     f"is larger than corresponding Etot at parallel calculation."
+                     f"The start point for series eos calculations might be"
+                     f"meta-stable states above the ground state.\n")
                 series_results.update({"eos_is_converged": False})
     return series_results
 
@@ -221,6 +225,9 @@ def wfk_calculations(
 @job
 def eos_delta_calculation(element, configuration, volume_energy_results):
     flag = volume_energy_results["eos_is_converged"]
+    tmp = deepcopy(volume_energy_results)
+    tmp.pop("minimum_eos_result")
+    print(tmp)
     if flag is True:
         fitting_results = birch_murnaghan_fit(volume_energy_results)
         v0 = fitting_results["volume0"]
@@ -228,11 +235,9 @@ def eos_delta_calculation(element, configuration, volume_energy_results):
         b1 = fitting_results["bulk_deriv0"]
         num = volume_energy_results["num_of_atoms"]
         eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
-        print(volume_energy_results)
         print(eos_results)
         return eos_results
     else:
-        print(volume_energy_results)
         return {}
 
 
