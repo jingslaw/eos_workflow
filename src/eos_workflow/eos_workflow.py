@@ -1,18 +1,23 @@
 import os
 import json
+import logging
 from copy import deepcopy
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from atomate2.abinit.jobs.core import StaticMaker
 from atomate2.abinit.sets.base import AbinitInputGenerator
 from atomate2.abinit.schemas.calculation import TaskState
 from atomate2.abinit.schemas.task import AbinitTaskDoc
+from atomate2.abinit.utils.history import JobHistory
 from pymatgen.core import Structure
 from pymatgen.io.abinit.pseudos import PseudoTable
 from jobflow import Flow, job, Response
 
 from eos_workflow.sets import get_standard_structure, eos_input_generation, eos_kpoints_generation, EosSetGenerator
 from eos_workflow.delta_metric import birch_murnaghan_fit, metric_analyze
+
+logger = logging.getLogger(__name__)
 
 
 def float2bson(eta: float):
@@ -28,6 +33,38 @@ class EosMaker(StaticMaker):
     calc_type: str = "scf"
     name: str = "eos calculation, scaling_factor=1.00"
     input_set_generator: AbinitInputGenerator = field(default_factory=EosSetGenerator)
+
+    def get_response(
+        self,
+        task_document: AbinitTaskDoc,
+        history: JobHistory,
+        max_restarts: int = 5,
+        prev_outputs: str | tuple | list | Path | None = None,
+    ) -> Response:
+        """Rewrite StaticMaker.get_response(). Switch off the unconverged error when run_number > max_restarts"""
+        if task_document.state == TaskState.SUCCESS:
+            return Response(
+                output=task_document,
+            )
+
+        if history.run_number > max_restarts:
+            return Response(
+                output=task_document,
+            )
+
+        logger.info("Getting restart job.")
+
+        new_job = self.make(
+            structure=task_document.structure,
+            restart_from=task_document.dir_name,
+            prev_outputs=prev_outputs,
+            history=history,
+        )
+
+        return Response(
+            output=task_document,
+            replace=new_job,
+        )
 
 
 def parallel_eos_calculation(
@@ -300,3 +337,7 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     delta_job = eos_delta_calculation(element, configuration, wfk_job.output)
     eos_jobflow.append(delta_job)
     return eos_jobflow
+
+
+if __name__ == "__main__":
+    print("test")

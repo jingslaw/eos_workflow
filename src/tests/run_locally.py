@@ -7,6 +7,6 @@ if __name__ == "__main__":
     configuration = 'Diamond'
     pseudos = "ONCVPSP-PBE-SR-PDv0.4:standard"
 
-    eos = eos_workflow(element, configuration, ecut, pseudos, precision="debug")
+    eos = eos_workflow(element, configuration, ecut, pseudos, precision="test")
     result = run_locally(eos, create_folders=True)
     # print(result)

@@ -4,9 +4,8 @@ from pathlib import Path
 from ase import io
 
 from abipy.abio.input_tags import SCF
-from atomate2.abinit.jobs.core import StaticMaker
 from atomate2.abinit.sets.core import StaticSetGenerator
-from atomate2.abinit.sets.base import AbinitInputGenerator, as_pseudo_table
+from atomate2.abinit.sets.base import as_pseudo_table
 from pymatgen.io.abinit.abiobjects import KSampling
 from pymatgen.io.ase import AseAtomsAdaptor
 from math import ceil
@@ -25,13 +24,6 @@ EOS_PREV_OUTPUTS_DEPS = (f"{SCF}:WFK",)
 class EosSetGenerator(StaticSetGenerator):
     calc_type: str = "static"
     prev_outputs_deps: tuple = EOS_PREV_OUTPUTS_DEPS
-
-
-@dataclass
-class EosMaker(StaticMaker):
-    calc_type: str = "scf"
-    name: str = "eos calculation, scaling_factor=1.00"
-    input_set_generator: AbinitInputGenerator = field(default_factory=EosSetGenerator)
 
 
 def nband_calculation(element, configuration, pseudos):
