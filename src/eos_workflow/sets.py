@@ -48,7 +48,7 @@ def nband_calculation(element, configuration, pseudos):
 def eos_input_generation(element, configuration, ecut, pseudos, precision='standard'):
     nband = nband_calculation(element, configuration, pseudos)
     if element in ELEMENTS_INCLUDE_F_ELECTRONS:
-        if configuration in UNARIE_CONFIGURATIONS:
+        if configuration in UNARIE_CONFIGURATIONS and configuration != "Diamond":
             nband = 20
         else:
             nband = ceil(1.5 * nband)
@@ -76,7 +76,19 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nspden": 1,
         }
     elif precision == "debug":
-        eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "tsmear": 2.25e-3, "toldfe": 5.0e-11 * natom}
+        eos_settings = {
+            "ecut": ecut,
+            "nband": nband,
+            "nstep": 100,
+            "tsmear": 2.25e-3,
+            "toldfe": 5.0e-11 * natom,
+            "chkprim": 0,
+            "chksymbreak": 0,
+            # "autoparal": 1,
+            "nspinor": 1,
+            "nsppol": 1,
+            "nspden": 1,
+        }
     else:
         eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "nspinor": 1, "nsppol": 1, "nspden": 1}
     return eos_settings
@@ -85,6 +97,8 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
 def eos_kpoints_generation(structure, precision='standard'):
     # unit of kpoint_distance is A^-1
     if precision == 'standard':
+        kpoints_distance = 0.06
+    elif precision == 'debug':
         kpoints_distance = 0.06
     else:
         kpoints_distance = 0.5

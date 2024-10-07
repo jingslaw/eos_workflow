@@ -9,4 +9,4 @@ if __name__ == "__main__":
 
     eos = eos_workflow(element, configuration, ecut, pseudos, precision="test")
     result = run_locally(eos, create_folders=True)
-    # print(result)
+    print(result)

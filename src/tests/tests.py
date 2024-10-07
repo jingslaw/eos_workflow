@@ -9,10 +9,10 @@ from jobflow_remote import submit_flow
 pseudos = "ONCVPSP-PBE-SR-PDv0.5:standard"
 
 ecut = 100
-element = 'Sm'
+element = 'Tm'
 configuration = 'XO3'
 
-eos = eos_workflow(element, configuration, ecut, pseudos, precision="standard")
+eos = eos_workflow(element, configuration, ecut, pseudos, precision="debug")
 # result = run_locally(eos, create_folders=True)
 result = submit_flow(eos)
-# print(result)
+print(result)

@@ -164,7 +164,7 @@ def series_eos_calculations(
 
 
 @job
-def eos_check(eos_jobs_outputs):
+def eos_check(eos_jobs_outputs, self_clean=True):
     volumes = []
     energies = []
     scaling_factors = []
@@ -210,6 +210,15 @@ def eos_check(eos_jobs_outputs):
     tmp = deepcopy(volume_energy)
     tmp.pop("minimum_eos_result")
     print(tmp)
+    if self_clean:
+        for eta, task_doc in eos_jobs_outputs.items():
+            if task_doc.state == TaskState.SUCCESS and task_doc.output.energy == minimum:
+                continue
+            else:
+                calc_path = task_doc.dir_name
+                wfk_path = os.path.join(calc_path, 'outdata/out_WFK')
+                if os.path.exists(wfk_path):
+                    os.remove(wfk_path)
     return volume_energy
 
 
