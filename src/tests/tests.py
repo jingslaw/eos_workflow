@@ -1,6 +1,7 @@
 from atomate2.abinit.sets.base import as_pseudo_table
 from abipy.flowtk.psrepos import OncvpspRepo
 from eos_workflow.eos_workflow import eos_workflow
+from eos_workflow.workflows import eos_workflows
 from jobflow import run_locally
 from jobflow_remote import submit_flow
 
@@ -8,11 +9,11 @@ from jobflow_remote import submit_flow
 # pseudos = repo.get_pseudos("standard")
 pseudos = "ONCVPSP-PBE-SR-PDv0.5:standard"
 
-ecut = 100
-element = 'Tm'
-configuration = 'XO3'
+ecut = 20
+element = 'O'
+configurations = ['BCC', 'FCC']
 
-eos = eos_workflow(element, configuration, ecut, pseudos, precision="debug")
+eos = eos_workflows(element, ecut, pseudos, configurations=configurations, precision="test")
 # result = run_locally(eos, create_folders=True)
 result = submit_flow(eos)
 print(result)

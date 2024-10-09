@@ -68,6 +68,8 @@ class EosMaker(StaticMaker):
 
 
 def parallel_eos_calculation(
+        element: str,
+        configuration: str,
         structure: Structure,
         pseudos: str | list[str] | PseudoTable | None = "ONCVPSP-PBE-SR-PDv0.4:standard",
         abinit_settings=None,
@@ -90,15 +92,14 @@ def parallel_eos_calculation(
     eos_maker.input_set_generator.user_kpoints_settings = kpoints_settings
     eos_maker.input_set_generator.pseudos = pseudos
     eos_job = eos_maker.make(structure=structure)
-    eos_job.scaling_factor = 1.00
+    eos_job.name = f"eos-{element}-{configuration}-1.00"
     eos_jobs.append(eos_job)
     eos_outputs = {float2bson(1.00): eos_job.output}
     for eta in volume_scaling_list:
         structure = structure.copy()
         structure = structure.scale_lattice(volume0 * eta)
         eos_job = eos_maker.make(structure=structure)
-        eos_job.name = f"eos calculation, scaling_factor={eta}"
-        eos_job.scaling_factor = eta
+        eos_job.name = f"eos-{element}-{configuration}-{eta}"
         eos_jobs.append(eos_job)
         eos_outputs.update({float2bson(eta): eos_job.output})
     flow = Flow(eos_jobs, output=eos_outputs)
@@ -117,6 +118,8 @@ def get_series_neighbors(eta0, volume_scaling_list=None):
 
 
 def series_eos_calculations(
+        element: str,
+        configuration: str,
         eta: float,
         minimum: AbinitTaskDoc,
         pseudos: str | list[str] | PseudoTable | None = "ONCVPSP-PBE-SR-PDv0.4:standard",
@@ -145,8 +148,7 @@ def series_eos_calculations(
         structure = structure.copy()
         structure = structure.scale_lattice(volume0 * eta)
         eos_job = eos_maker.make(structure=structure, prev_outputs=path)
-        eos_job.name = f"eos calculation, scaling_factor={eta}"
-        eos_job.scaling_factor = eta
+        eos_job.name = f"eos-{element}-{configuration}-{eta}"
         path = eos_job.output.dir_name
         eos_jobs.append(eos_job)
         eos_outputs.update({float2bson(eta): eos_job.output})
@@ -155,8 +157,7 @@ def series_eos_calculations(
         structure = structure.copy()
         structure = structure.scale_lattice(volume0 * eta)
         eos_job = eos_maker.make(structure=structure, prev_outputs=path)
-        eos_job.name = f"eos calculation, scaling_factor={eta}"
-        eos_job.scaling_factor = eta
+        eos_job.name = f"eos-{element}-{configuration}-{eta}"
         path = eos_job.output.dir_name
         eos_jobs.append(eos_job)
         eos_outputs.update({float2bson(eta): eos_job.output})
@@ -243,11 +244,13 @@ def series_vs_parallel_results(series_results, parallel_results):
 
 @job
 def wfk_calculations(
-        volume_energy_result,
-        pseudos,
-        abinit_settings,
-        kpoints_settings,
-        volume_scaling_list
+    element,
+    configuration,
+    volume_energy_result,
+    pseudos,
+    abinit_settings,
+    kpoints_settings,
+    volume_scaling_list
 ):
     if volume_energy_result["eos_is_converged"]:
         return volume_energy_result
@@ -255,6 +258,8 @@ def wfk_calculations(
         minimum = volume_energy_result["minimum_eos_result"]
         eta = volume_energy_result["eta_min"]
         series_eos_job = series_eos_calculations(
+            element,
+            configuration,
             eta,
             minimum,
             pseudos,
@@ -270,11 +275,15 @@ def wfk_calculations(
 
 
 @job
-def eos_delta_calculation(element, configuration, volume_energy_results):
+def eos_delta_calculation(
+    element: str,
+    configuration: str,
+    volume_energy_results: dict,
+):
     flag = volume_energy_results["eos_is_converged"]
-    tmp = deepcopy(volume_energy_results)
-    tmp.pop("minimum_eos_result")
-    print(tmp)
+    result = deepcopy(volume_energy_results)
+    result.pop("minimum_eos_result")
+    print(result)
     if flag is True:
         fitting_results = birch_murnaghan_fit(volume_energy_results)
         v0 = fitting_results["volume0"]
@@ -283,11 +292,11 @@ def eos_delta_calculation(element, configuration, volume_energy_results):
         num = volume_energy_results["num_of_atoms"]
         eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
         print(eos_results)
-    else:
-        eos_results = {}
+        result.update(eos_results)
     with open("eos_fitting_results.json", 'w') as fp:
-        json.dump(eos_results, fp, indent=4)
-    return eos_results
+        tmp = {element: {configuration: result}}
+        json.dump(tmp, fp, indent=4)
+    return result
 
 
 @job
@@ -327,6 +336,7 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     inputs_job = generate_abinit_inputs(element, configuration, ecut, pseudos, structure, precision=precision)
 
     eos_jobs = parallel_eos_calculation(
+        element, configuration,
         structure, pseudos,
         abinit_settings=inputs_job["user_abinit_settings"],
         kpoints_settings=inputs_job["user_kpoints_settings"],
@@ -336,6 +346,8 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     check_job = eos_check(eos_jobs.output)
     eos_jobflow.append(check_job)
     wfk_job = wfk_calculations(
+        element,
+        configuration,
         check_job.output,
         pseudos,
         abinit_settings=inputs_job["user_abinit_settings"],
@@ -345,7 +357,8 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     eos_jobflow.append(wfk_job)
     delta_job = eos_delta_calculation(element, configuration, wfk_job.output)
     eos_jobflow.append(delta_job)
-    return eos_jobflow
+    workflow = Flow(eos_jobflow, output=delta_job.output)
+    return workflow
 
 
 if __name__ == "__main__":

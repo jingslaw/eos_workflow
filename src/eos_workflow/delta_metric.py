@@ -217,7 +217,7 @@ def metric_analyze(element, configuration, v0, b0, b1, natoms):
                 "delta_unit": "meV/atom",
                 "delta_relative": deltarel,
                 "delta_relative_unit": "%",
-                "natoms": natoms,
+                "num_of_atoms": natoms,
                 "delta/natoms": delta / natoms,
             }
         )
