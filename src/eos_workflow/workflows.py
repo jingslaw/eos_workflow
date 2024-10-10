@@ -14,12 +14,14 @@ def eos_workflows(
     element: str,
     ecut: float,
     pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
-    configurations: list[str] | None = None,
+    configurations: str | list[str] | None = None,
     volume_scaling_list: list[float] | None = None,
     precision: str = 'standard'
 ):
     if configurations is None:
         configurations = ACWF_CONFIGURATIONS
+    if isinstance(configurations, str):
+        configurations = [configurations]
     workflows = []
     outputs = {}
     for configuration in configurations:
