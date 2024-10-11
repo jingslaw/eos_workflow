@@ -10,7 +10,7 @@ from jobflow_remote import submit_flow
 pseudos = "ONCVPSP-PBE-SR-PDv0.5:standard"
 
 ecut = 100
-element = 'Pr'
+element = 'Pm'
 configurations = None
 
 eos = eos_workflows(element, ecut, pseudos, configurations=configurations, precision="debug")

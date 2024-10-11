@@ -8,6 +8,17 @@ OXIDE_CONFIGURATIONS = ["XO", "XO2", "XO3", "X2O", "X2O3", "X2O5"]
 UNARIE_CONFIGURATIONS = ["BCC", "FCC", "SC", "Diamond"]
 
 
+def birch_murnaghan_function(v, e0, v0, b0, b1):
+    """
+        Return the energy for given volume (V - it can be a vector) according to
+        the Birch Murnaghan function with parameters E0,V0,B0,B1.
+    """
+    r = (v0 / v) ** (2.0 / 3.0)
+    return e0 + 9.0 / 16.0 * b0 * v0 * (
+        (r - 1.0) ** 3 * b1 + (r - 1.0) ** 2 * (6.0 - 4.0 * r)
+    )
+
+
 def birch_murnaghan_fit(volume_energy):
     # energy (eV) -- volume (A^3)
     volumes = np.array(volume_energy["volumes"])
@@ -136,30 +147,7 @@ def rel_errors_vec_length(v0w, b0w, b1w, v0f, b0f, b1f, prefact=100, weight_b0=1
     return leng * prefact
 
 
-def metric_analyze(element, configuration, v0, b0, b1, natoms):
-    """
-    The calcfunction calculate the metric factor.
-    return delta factor with unit (eV/atom)
-
-    The configuration can be one of:
-    - RE: for Rare-earth element
-    - GS: for BM fit results from Corttiner's paper
-    - One of OXIDES:
-        - XO
-        - XO2
-        - XO3
-        - X2O
-        - X2O3
-        - X2O5
-    - One of UNARIES:
-        - BCC
-        - FCC
-        - SC
-        - Diamond
-    - For actinides and Ar, Fr, Ra: using FCC from ACWF dataset
-
-    conf_key is key in json file for configurations of every element.
-    """
+def load_ae_birch_murnaghan(element, configuration):
     if configuration == "DC":
         configuration = "Diamond"
     if configuration == "RE":
@@ -187,12 +175,35 @@ def metric_analyze(element, configuration, v0, b0, b1, natoms):
             data = json.load(handle)
     else:
         raise FileNotFoundError(f"File not found: {ae_eos_path}")
+    return data["BM_fit_data"][conf_key]
 
-    # import_path = (importlib.resources.path("abinit_fireworks.AE_EOS", ref_json))
-    # with import_path as path, open(path, "rb") as handle:
-    #    data = json.load(handle)
 
-    bm_fit = data["BM_fit_data"][conf_key]
+def metric_analyze(element, configuration, v0, b0, b1, natoms):
+    """
+    The calcfunction calculate the metric factor.
+    return delta factor with unit (eV/atom)
+
+    The configuration can be one of:
+    - RE: for Rare-earth element
+    - GS: for BM fit results from Corttiner's paper
+    - One of OXIDES:
+        - XO
+        - XO2
+        - XO3
+        - X2O
+        - X2O3
+        - X2O5
+    - One of UNARIES:
+        - BCC
+        - FCC
+        - SC
+        - Diamond
+    - For actinides and Ar, Fr, Ra: using FCC from ACWF dataset
+
+    conf_key is key in json file for configurations of every element.
+    """
+
+    bm_fit = load_ae_birch_murnaghan(element, configuration)
     ref_v0, ref_b0, ref_b1 = (
         bm_fit["min_volume"],
         bm_fit["bulk_modulus_ev_ang3"],

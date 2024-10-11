@@ -290,6 +290,8 @@ def eos_delta_calculation(
         b0 = fitting_results["bulk_modulus0"]
         b1 = fitting_results["bulk_deriv0"]
         num = volume_energy_results["num_of_atoms"]
+        e0 = fitting_results["energy0"]
+        result.update({"energy0": e0})
         eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
         print(eos_results)
         result.update(eos_results)
