@@ -1,4 +1,5 @@
 import json
+import click
 import numpy as np
 import matplotlib.pyplot as plt
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
@@ -62,6 +63,53 @@ def eos_plot(
     ax.set_title(title, fontsize=fontsize)
 
 
+def convergence_plot(
+    ax,
+    convergence_data,
+    converged_xy,
+    y_thresholds_range,
+    y_label,
+    title,
+):
+    xs = convergence_data["xs"]
+    ys = convergence_data["ys"]
+
+    # xlim a bit larger than the range of xs
+    xlims = (min(xs) * 0.9, max(xs) * 1.02)
+
+    ax.plot(xs, ys, "-x")
+    ax.scatter(
+        *converged_xy,
+        marker="s",
+        s=100,
+        label=f"Converge at {converged_xy[0]} Ry",
+        facecolors="none",
+        edgecolors="red",
+    )
+    ax.fill_between(
+        x=xlims,
+        y1=y_thresholds_range[0],
+        y2=y_thresholds_range[1],
+        alpha=0.3,
+        color="green",
+    )
+    ax.legend(loc="upper right", fontsize=8)
+
+    # twice the range of ylimits if the y_thresholds_range just cover the y range
+    if y_thresholds_range[1] > max(ys) or y_thresholds_range[1] < max(ys) * 4:
+        y_max = y_thresholds_range[1] * 2
+        y_min = -0.05 * y_max
+        ax.set_ylim(bottom=y_min, top=y_max)
+
+    # change ticks size
+    ax.tick_params(axis="both", labelsize=6)
+
+    ax.set_xlim(*xlims)
+    ax.set_ylabel(y_label, fontsize=8)
+    ax.set_xlabel("Cutoff (Ry)", fontsize=8)
+    ax.set_title(title, fontsize=8)
+
+
 def eos_inspect(filepath="eos_fitting_results.json"):
     with open(filepath, 'r') as fp:
         eos_results = json.load(fp)
@@ -94,3 +142,51 @@ def eos_inspect(filepath="eos_fitting_results.json"):
         # fig to pdf
         fig.tight_layout()
         fig.savefig(f"{element}_precision.pdf", bbox_inches="tight")
+
+
+def converge_inspect(filepath="eos_converge_results.json"):
+    with open(filepath, 'r') as fp:
+        eos_results = json.load(fp)
+    fig, ax = plt.subplots(1, 1, figsize=(11.69, 8.27), dpi=100)
+    y_thresholds_range = [0.0, 0.2]
+    y_label = 'Δ meV/atom'
+    title = "eos convergence wrt wavefunction cutoff"
+
+    ecut_list = eos_results['ecut']
+    delta_list = eos_results['delta/natoms']
+    conv_data = {"xs": [], "ys": []}
+    for i in range(len(ecut_list)):
+        if delta_list[i] != "NaN":
+            conv_data["xs"].append(ecut_list[i])
+            conv_data["ys"].append(delta_list[i])
+    wfc_scan_healthy = len(conv_data["xs"]) / len(ecut_list)
+
+    if wfc_scan_healthy != 1:
+        color = "red"
+    else:
+        color = "green"
+    click.secho(
+        f"Convergence scan healthy check for {property}: "
+        f"wavefunction scan = {round(wfc_scan_healthy * 100, 2)}%", fg=color,
+    )
+    if len(conv_data["xs"]) == 0:
+        click.secho("All eos calculations are failed", fg="red")
+        ax.text(0.5, 0.5, "All eos calculations are failed", color="red")
+        ax.set_axis_off()
+    else:
+        reference = conv_data["ys"][-1]
+        conv_data["ys"] = [x - reference for x in conv_data["ys"]]
+        index = 0
+        for delta in reversed(conv_data["ys"]):
+            if delta > y_thresholds_range[1]:
+                index = conv_data["ys"].index(delta)
+                break
+        if index != 0:
+            index += 1
+        _x = conv_data["xs"][index]
+        _y = conv_data["ys"][index]
+        converged_xy = (_x, _y)
+        convergence_plot(ax, conv_data, converged_xy, y_thresholds_range, y_label=y_label, title=title)
+    # fig to pdf
+    fig.tight_layout()
+    fig.savefig("converge.pdf", bbox_inches="tight")

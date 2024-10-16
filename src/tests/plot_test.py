@@ -1,5 +1,5 @@
 import json
-from eos_workflow.inspect import eos_inspect
+from eos_workflow.inspect import eos_inspect, converge_inspect
 from eos_workflow.delta_metric import birch_murnaghan_fit
 
 
