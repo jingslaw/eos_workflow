@@ -41,7 +41,7 @@ def eos_workflows(
 
 
 @job
-def converge_results(ecuts, outputs, print_raw=True):
+def converge_results(element, configuration, ecuts, outputs, print_raw=True):
     nu = []
     delta = []
     for output in outputs:
@@ -52,6 +52,8 @@ def converge_results(ecuts, outputs, print_raw=True):
             nu.append("NaN")
             delta.append("NaN")
     results = {
+        "element": element,
+        "configuration": configuration,
         "ecut": ecuts,
         "nu": nu,
         "delta/natoms": delta,
@@ -89,5 +91,5 @@ def eos_converge_workflows(
         workflows.append(workflow)
         outputs.append(workflow.output)
     flow = Flow(workflows, output=outputs)
-    result = converge_results(ecuts, flow.output)
-    return [flow, result, export_result(result.output, file_name="eos_converge_results.json")]
+    result = converge_results(element, configuration, ecuts, flow.output)
+    return Flow([flow, result, export_result(result.output, file_name="eos_converge_results.json")])

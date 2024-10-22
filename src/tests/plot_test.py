@@ -15,5 +15,6 @@ def obtain_v0(filepath="eos_fitting_results.json"):
 
 if __name__ == "__main__":
     # obtain_v0()
-    eos_inspect()
+    # eos_inspect()
+    converge_inspect()
 

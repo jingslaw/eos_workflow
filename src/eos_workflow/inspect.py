@@ -2,6 +2,7 @@ import json
 import click
 import numpy as np
 import matplotlib.pyplot as plt
+from math import ceil
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
 
 
@@ -82,7 +83,7 @@ def convergence_plot(
         *converged_xy,
         marker="s",
         s=100,
-        label=f"Converge at {converged_xy[0]} Ry",
+        label=f"Converge at {converged_xy[0]} Ha",
         facecolors="none",
         edgecolors="red",
     )
@@ -114,7 +115,7 @@ def eos_inspect(filepath="eos_fitting_results.json"):
     with open(filepath, 'r') as fp:
         eos_results = json.load(fp)
     for element, results in eos_results.items():
-        rows = len(results) // 2
+        rows = ceil(len(results) / 2)
         fig, axs = plt.subplots(rows, 2, figsize=(8.27, 11.69), dpi=100)
         i = 0
         for config, res in results.items():
@@ -152,6 +153,8 @@ def converge_inspect(filepath="eos_converge_results.json"):
     y_label = 'Δ meV/atom'
     title = "eos convergence wrt wavefunction cutoff"
 
+    element = eos_results["element"]
+    configuration = eos_results["configuration"]
     ecut_list = eos_results['ecut']
     delta_list = eos_results['delta/natoms']
     conv_data = {"xs": [], "ys": []}
@@ -178,10 +181,12 @@ def converge_inspect(filepath="eos_converge_results.json"):
         conv_data["ys"] = [x - reference for x in conv_data["ys"]]
         index = 0
         for delta in reversed(conv_data["ys"]):
-            if delta > y_thresholds_range[1]:
+            if abs(delta) > y_thresholds_range[1]:
                 index = conv_data["ys"].index(delta)
                 break
-        if index != 0:
+        if abs(conv_data["ys"][0]) < y_thresholds_range[1]:
+            pass
+        else:
             index += 1
         _x = conv_data["xs"][index]
         _y = conv_data["ys"][index]
@@ -189,4 +194,4 @@ def converge_inspect(filepath="eos_converge_results.json"):
         convergence_plot(ax, conv_data, converged_xy, y_thresholds_range, y_label=y_label, title=title)
     # fig to pdf
     fig.tight_layout()
-    fig.savefig("converge.pdf", bbox_inches="tight")
+    fig.savefig(f"{element}-{configuration}-converge.pdf", bbox_inches="tight")
