@@ -89,6 +89,33 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nsppol": 1,
             "nspden": 1,
         }
+    elif precision == "bands":
+        eos_settings = {
+            "ecut": ecut,
+            "nband": nband,
+            "nsppol": 1,
+            "nspinor": 1,
+            "nspden": 1,
+            "occopt": 3,
+            "tsmear": 0.01,
+            "tolvrs": 1e-8 * natom,
+        }
+    elif precision == "molecule":
+        charge = {'X2O': -7, 'XO': -10, 'X2O3': -9, 'XO2': -12, 'X2O5': -7, 'XO3': -6}
+        eos_settings = {
+            "ecut": ecut,
+            "nstep": 100,
+            # "tsmear": 2.25e-3,
+            # "toldfe": 5.0e-11 * natom,
+            "chkprim": 0,
+            "chksymbreak": 0,
+            # "autoparal": 1,
+            "nspinor": 1,
+            "nsppol": 1,
+            "nspden": 1,
+            "diemac": 3.0,
+            'charge': charge[configuration]
+        }
     else:
         eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "nspinor": 1, "nsppol": 1, "nspden": 1}
     return eos_settings
@@ -100,6 +127,10 @@ def eos_kpoints_generation(structure, precision='standard'):
         kpoints_distance = 0.06
     elif precision == 'debug':
         kpoints_distance = 0.06
+    elif precision == 'bands':
+        kpoints_distance = 0.2
+    elif precision == 'molecule':
+        kpoints_distance = 100
     else:
         kpoints_distance = 0.5
     reciprocal_lattice_length = structure.lattice.reciprocal_lattice.abc

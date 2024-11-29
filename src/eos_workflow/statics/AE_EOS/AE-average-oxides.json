@@ -2329,14 +2329,14 @@
      "E0": 0,
      "bulk_deriv": 4.6630518431404155,
      "bulk_modulus_ev_ang3": 0.899255690936549,
-     "min_volume": 57.93310344724358,
+     "min_volume": 115.86620689448716,
      "residuals": 0
    },
    "O-XO": {
      "E0": 0,
      "bulk_deriv": 4.56494844702576,
      "bulk_modulus_ev_ang3": 1.071865396366749,
-     "min_volume": 7.953538741823925,
+     "min_volume": 15.907077483647850,
      "residuals": 0
    },
    "O-XO2": {
