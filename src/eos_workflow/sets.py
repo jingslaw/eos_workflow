@@ -8,6 +8,7 @@ from atomate2.abinit.sets.core import StaticSetGenerator
 from atomate2.abinit.sets.base import as_pseudo_table
 from pymatgen.io.abinit.abiobjects import KSampling
 from pymatgen.io.ase import AseAtomsAdaptor
+from pydantic import BaseModel, Field
 from math import ceil
 
 from eos_workflow.utilities import (
@@ -18,6 +19,23 @@ from eos_workflow.utilities import (
 )
 
 EOS_PREV_OUTPUTS_DEPS = (f"{SCF}:WFK",)
+
+
+class EosDoc(BaseModel):
+    all_missing_outputs: dict = Field(None, description="Number of missing outputs at X-config eos workflow")
+    warning_lines: list = Field(None, description="")
+    failed_wfs: list = Field(None, description=" A list of dictionaries with information on the workchains "
+                                               "that did not finish with a 0 exit code")
+    completely_off: list = Field(None, description="A list of dictionaries that indicate which elements and "
+                                                   "configurations have been computed completely off-centre (meaning "
+                                                   "that the minimum of all computed energies is on either of the "
+                                                   "two edges, i.e. for the smallest or largest volume)")
+    all_eos_data: dict = Field(None, description="Dictionary with the EOS data (volumes and energies datapoints)."
+                                                 " The keys are the same as the `uuid_mapping`. Values can be None")
+    all_stress_data: dict = Field(None, description="")
+    all_BM_fit_data: dict = Field(None, description="Birch-Murnaghan fit data. See above for the keys. "
+                                                    "Can be None.")
+    num_atoms_in_sim_cell: dict = Field(None, description="")
 
 
 @dataclass

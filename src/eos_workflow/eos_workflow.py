@@ -213,13 +213,31 @@ def eos_check(eos_jobs_outputs, self_clean=True):
     print(tmp)
     if self_clean:
         for eta, task_doc in eos_jobs_outputs.items():
-            if task_doc.state == TaskState.SUCCESS and task_doc.output.energy == minimum:
-                continue
-            else:
-                calc_path = task_doc.dir_name
-                wfk_path = os.path.join(calc_path, 'outdata/out_WFK')
-                if os.path.exists(wfk_path):
-                    os.remove(wfk_path)
+            calc_path = task_doc.dir_name
+            try:
+                uuid, times = calc_path.split('_')
+                times = int(times)
+
+                # Determine range of iterations
+                if task_doc.state == TaskState.SUCCESS and task_doc.output.energy == minimum:
+                    iterations = range(1, times)
+                else:
+                    iterations = range(1, times + 1)
+
+                # Remove files for the specified iterations
+                for i in iterations:
+                    path = f"{uuid}_{i}"
+                    wfk_path = os.path.join(path, 'outdata/out_WFK')
+                    if os.path.exists(wfk_path):
+                        os.remove(wfk_path)
+            except ValueError:
+                if task_doc.state == TaskState.SUCCESS and task_doc.output.energy == minimum:
+                    continue
+                else:
+                    wfk_path = os.path.join(calc_path, 'outdata/out_WFK')
+                    if os.path.exists(wfk_path):
+                        os.remove(wfk_path)
+
     return volume_energy
 
 
@@ -275,6 +293,13 @@ def wfk_calculations(
 
 
 @job
+def export_single_workflow(element, configuration, result, fname="eos_fitting_results.json"):
+    with open(fname, 'w') as fp:
+        tmp = {element: {configuration: result}}
+        json.dump(tmp, fp, indent=4)
+    return tmp
+
+@job
 def eos_delta_calculation(
     element: str,
     configuration: str,
@@ -295,9 +320,6 @@ def eos_delta_calculation(
         eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
         print(eos_results)
         result.update(eos_results)
-    with open("eos_fitting_results.json", 'w') as fp:
-        tmp = {element: {configuration: result}}
-        json.dump(tmp, fp, indent=4)
     return result
 
 
@@ -359,6 +381,8 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     eos_jobflow.append(wfk_job)
     delta_job = eos_delta_calculation(element, configuration, wfk_job.output)
     eos_jobflow.append(delta_job)
+    write_job = export_single_workflow(element, configuration, delta_job.output)
+    eos_jobflow.append(write_job)
     workflow = Flow(eos_jobflow, output=delta_job.output)
     return workflow
 

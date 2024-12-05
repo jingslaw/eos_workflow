@@ -1,9 +1,15 @@
+import os
 import json
 import click
 import numpy as np
 import matplotlib.pyplot as plt
 from math import ceil
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
+from eos_workflow.workflows import sum_up
+from jobflow_remote import get_jobstore
+
+__version__ = "0.0.1"
+NUM_OF_VOLUMES = 7
 
 
 # referred from aiida_sssp_workflow.cli.inspect and considered birch-murnaghan fitting failed case of PS
@@ -195,3 +201,103 @@ def converge_inspect(filepath="eos_converge_results.json"):
     # fig to pdf
     fig.tight_layout()
     fig.savefig(f"{element}-{configuration}-converge.pdf", bbox_inches="tight")
+
+
+def collect_results(set_name: str, nn_name: str, func_name: str = "export_single_workflow"):
+    warning_lines = []
+    all_missing_outputs = {}
+    completely_off = []
+    failed_wfs = []
+    all_eos_data = {}
+    all_stress_data = {}
+    all_BM_fit_data = {}
+    num_atoms_in_sim_cell = {}
+    uuid_mapping = {}
+
+    js = get_jobstore()
+    js.connect()
+    allowed_values = {"export_result", "export_single_workflow"}
+    if func_name not in allowed_values:
+        raise ValueError(f"Invalid function name to export: {func_name}. Must be one of {allowed_values}.")
+    results = list(js.query({"name": func_name}))
+
+    if func_name == "export_result":
+        for res in results:
+            output = res["output"]
+            if output is None:
+                continue
+            warning_lines += output["warning_lines"]
+            all_missing_outputs.update(output["all_missing_outputs"])
+            completely_off += output["completely_off"]
+            failed_wfs += output["failed_wfs"]
+            all_eos_data.update(output["all_eos_data"])
+            all_stress_data.update(output["all_stress_data"])
+            all_BM_fit_data.update(output["all_BM_fit_data"])
+            num_atoms_in_sim_cell.update(output["num_atoms_in_sim_cell"])
+    elif func_name == "export_single_workflow":
+        for res in results:
+            output = res["output"]
+            eos_doc = sum_up(output, num_of_volumes=NUM_OF_VOLUMES)
+            warning_lines += eos_doc.warning_lines
+            all_missing_outputs.update(eos_doc.all_missing_outputs)
+            completely_off += eos_doc.completely_off
+            failed_wfs += eos_doc.failed_wfs
+            all_eos_data.update(eos_doc.all_eos_data)
+            all_stress_data.update(eos_doc.all_stress_data)
+            all_BM_fit_data.update(eos_doc.all_BM_fit_data)
+            num_atoms_in_sim_cell.update(eos_doc.num_atoms_in_sim_cell)
+    else:
+        pass
+
+    data = {
+        'script_version': __version__,
+        'set_name': set_name,
+        # Mapping from strings like "He-X2O" to a dictionary with the UUIDs of the structure and the EOS workflow
+        'uuid_mapping': uuid_mapping,
+        # A list of dictionaries with information on the workchains that did not finish with a 0 exit code
+        'failed_wfs': failed_wfs,
+        # A dictionary that indicate for which elements and configurations there are missing outputs,
+        # (only for the workchains that still had enough volumes to be considered for a fit)
+        'missing_outputs': all_missing_outputs,
+        # A list of dictionaries that indicate which elements and configurations have been computed completely
+        # off-centre (meaning that the minimum of all computed energies is on either of the two edges, i.e. for
+        # the smallest or largest volume)
+        'completely_off': completely_off,
+        # Dictionary with the EOS data (volumes and energies datapoints). The keys are the same as the `uuid_mapping`.
+        # Values can be None.
+        'eos_data': all_eos_data,
+        'stress_data': all_stress_data,
+        # Birch-Murnaghan fit data. See above for the keys. Can be None.
+        'BM_fit_data': all_BM_fit_data,
+        'num_atoms_in_sim_cell': num_atoms_in_sim_cell
+    }
+
+    # Print some statistics on the results
+    warning_lines.append("")
+    # warning_lines.append("Counter of states: " + str(Counter(states)))
+    good_cnt = len([eos_data for eos_data in data['eos_data'] if eos_data is not None])
+    warning_lines.append("")
+    warning_lines.append(f"Minimum completely off for {len(completely_off)}/{good_cnt}")
+    warning_lines.append("Completely off systems (symbol indicates if the minimum is on the very left or right):")
+    for system in data['completely_off']:
+        warning_lines.append(
+            f"- {system['element']} {system['configuration']} "
+            f"({'<' if system['side'] == 'left' else '>'})"
+        )
+
+    SET_NAME = set_name
+    PLUGIN_NAME = nn_name
+
+    fname = f"warnings-{SET_NAME}-{PLUGIN_NAME}.txt"
+    with open(fname, 'w') as fhandle:
+        for line in warning_lines:
+            fhandle.write(f"{line}\n")
+            print(line)
+    print(f"Warning log written to: '{fname}'.")
+
+    # Output results to file
+    os.makedirs('outputs', exist_ok=True)
+    fname = f"results-{SET_NAME}-{PLUGIN_NAME}.json"
+    with open(fname, 'w') as fhandle:
+        json.dump(data, fhandle, indent=2, sort_keys=True)
+    print(f"Output results written to: '{fname}'.")
