@@ -2,6 +2,7 @@ import os
 import json
 import click
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from math import ceil
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
@@ -228,7 +229,7 @@ def collect_results(set_name: str, nn_name: str, func_name: str = "export_single
                 continue
             warning_lines += output["warning_lines"]
             all_missing_outputs.update(output["all_missing_outputs"])
-            completely_off += output["completely_off"]
+            # completely_off += output["completely_off"]
             failed_wfs += output["failed_wfs"]
             all_eos_data.update(output["all_eos_data"])
             all_stress_data.update(output["all_stress_data"])
@@ -246,6 +247,10 @@ def collect_results(set_name: str, nn_name: str, func_name: str = "export_single
             all_stress_data.update(eos_doc.all_stress_data)
             all_BM_fit_data.update(eos_doc.all_BM_fit_data)
             num_atoms_in_sim_cell.update(eos_doc.num_atoms_in_sim_cell)
+            uuid = res["uuid"]
+            for element, ele_res in output.items():
+                for config, con_res in ele_res.items():
+                    uuid_mapping.update({f"{element}-{config}": {'structure': uuid, 'eos_workflow': uuid}})
     else:
         pass
 
@@ -301,3 +306,34 @@ def collect_results(set_name: str, nn_name: str, func_name: str = "export_single
     with open(fname, 'w') as fhandle:
         json.dump(data, fhandle, indent=2, sort_keys=True)
     print(f"Output results written to: '{fname}'.")
+
+    return data
+
+
+def collect_eos_results(data):
+    df = pd.DataFrame(
+        {
+            'element': [],
+            'SC': [],
+            'BCC': [],
+            'FCC': [],
+            'Diamond': [],
+            'X2O': [],
+            'XO': [],
+            "X2O3": [],
+            "XO2": [],
+            "X2O5": [],
+            "XO3": [],
+        }
+    )
+    eos_data = data['eos_data']
+    for element, result in data.items():
+        new_row = {'element': element}
+        for config, c_res in result.items():
+            nu = c_res['output_parameters']['rel_errors_vec_length']
+            new_row[config] = nu
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+
+    df.index = df.index + 1
+    df = df.round(3)
+    df.to_csv('eos_results.csv')

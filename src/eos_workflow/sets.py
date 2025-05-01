@@ -67,7 +67,7 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
     nband = nband_calculation(element, configuration, pseudos)
     if element in ELEMENTS_INCLUDE_F_ELECTRONS:
         if configuration in UNARIE_CONFIGURATIONS and configuration != "Diamond":
-            nband = 20
+            nband = ceil(max(1.5 * nband, 20))
         else:
             nband = ceil(1.5 * nband)
     else:
@@ -100,6 +100,7 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nstep": 100,
             "tsmear": 2.25e-3,
             "toldfe": 5.0e-11 * natom,
+            "occopt": 3,
             "chkprim": 0,
             "chksymbreak": 0,
             # "autoparal": 1,
