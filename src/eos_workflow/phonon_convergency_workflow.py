@@ -71,15 +71,17 @@ def parse_phonon_files(prev_outputs):
                 energies = [float(x.replace('E', 'e')) for x in energies_str.split()]
                 data["phonon energies (Ha)"] = energies
 
-            # Match phonon frequencies (cm-1) — capture multiple lines
+            # Match phonon frequencies (cm-1) capture multiple lines
             freq_match = re.search(
                 r"Phonon frequencies in cm-1\s*:\s*([\s\S]*?)(?=\n\s*\n|\n\s*Phonon|$)",
                 text
             )
             if freq_match:
                 freqs_str = freq_match.group(1)
-                freqs_str = freqs_str.replace('-', ' ')  # remove separators
-                freqs = [float(x.replace('E', 'e')) for x in freqs_str.split()]
+                # Remove continuation markers: a lone "- " at start of a line
+                freqs_str = re.sub(r"(?m)^\s*-\s+", "", freqs_str)
+                # Convert to floats safely
+                freqs = [float(x.replace("E", "e")) for x in freqs_str.split()]
                 data["phonon frequencies (cm^-1)"] = freqs
 
         except Exception:

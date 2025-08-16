@@ -16,7 +16,7 @@ jobs = phonon_convergency_workflow(
     ecuts=ecuts,
     qpt_list=[[0.5, 0.5, 0.5], [0.0, 0.0, 0.0]]
 )
-jobs = set_run_config(jobs, name_filter="generate_perts", worker="lucia_frontend")
+# jobs = set_run_config(jobs, name_filter="generate_perts", worker="lucia_frontend")
 jobs = set_run_config(jobs, name_filter="Merge DDB", worker="lucia_frontend")
 jobs = set_run_config(jobs, name_filter="parse_phonon_files", worker="lucia_frontend")
 jobs = set_run_config(jobs, name_filter="write_to_file", worker="lucia_frontend")
