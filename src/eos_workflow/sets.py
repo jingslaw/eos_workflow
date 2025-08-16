@@ -150,6 +150,8 @@ def eos_kpoints_generation(structure, precision='standard'):
         kpoints_distance = 0.2
     elif precision == 'molecule':
         kpoints_distance = 100
+    elif precision == 'phonon':
+        kpoints_distance = 0.15
     else:
         kpoints_distance = 0.5
     reciprocal_lattice_length = structure.lattice.reciprocal_lattice.abc

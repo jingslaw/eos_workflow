@@ -7,24 +7,30 @@ from jobflow_remote import submit_flow, set_run_config, get_jobstore
 from eos_workflow.inspect import collect_results
 from eos_workflow.sets import EosDoc
 
-pseudos = "ONCVPSP-PBE-SR-PDv1.0:standard"
+pseudos = "ONCVPSP-PBE-SR-PDv0.5:standard"
 
-ecut = 100
-element = 'Eu'
+element = 'Mn'
 # configurations = ['XO', 'XO2', 'XO3', 'X2O', 'X2O3', 'X2O5']
 # configurations = ['BCC', 'FCC', 'SC', 'Diamond']
-# small_config = ['BCC', 'Diamond', 'X2O', 'XO', 'XO2', 'XO3']
-# rest = ['FCC', 'SC', 'X2O3', 'X2O5']
-configurations = ['BCC', 'XO']
-eos = eos_workflows(element, ecut, pseudos,
-                    precision="debug",
-                    volume_scaling_list=[0.94, 0.98, 1.00, 1.02, 1.06],
-                    configurations=configurations
-                    )
-eos = set_run_config(eos, name_filter="eos_check", worker="lucia_frontend")
-eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="lucia_frontend")
-eos = set_run_config(eos, name_filter="export_result", worker="lucia_frontend")
-eos = set_run_config(eos, name_filter="export_single_workflow", worker="lucia_frontend")
+small_config = ['BCC', 'Diamond', 'X2O', 'XO', 'XO2', 'XO3']
+rest = ['FCC', 'SC', 'X2O3', 'X2O5']
+configurations = ['X2O3', 'X2O5']
+for ecut in [100]:
+    eos = eos_workflows(element, ecut, pseudos,
+                        precision="debug",
+                        volume_scaling_list=[0.94, 0.98, 1.00, 1.02, 1.06],
+                        configurations=configurations
+                        )
+    eos = set_run_config(eos, name_filter="eos_check", worker="manneback_frontend")
+    eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="manneback_frontend")
+    eos = set_run_config(eos, name_filter="export_result", worker="manneback_frontend")
+    eos = set_run_config(eos, name_filter="export_single_workflow", worker="manneback_frontend")
+
+    """eos = set_run_config(eos, name_filter="eos_check", worker="lucia_frontend")
+    eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="lucia_frontend")
+    eos = set_run_config(eos, name_filter="export_result", worker="lucia_frontend")
+    eos = set_run_config(eos, name_filter="export_single_workflow", worker="lucia_frontend")"""
+    result = submit_flow(eos)
 
 """eos = set_run_config(eos, name_filter="eos_check", worker="manneback_frontend")
 eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="manneback_frontend")
@@ -37,9 +43,10 @@ eos = set_run_config(eos, name_filter="export_single_workflow", worker="mannebac
 # eos = eos_converge_workflows(element, configuration, ecuts, pseudos, precision="test")
 
 # result = run_locally(eos, create_folders=True)
-result = submit_flow(eos)
+
 print(result)
 print(element)
+print(pseudos)
 
 
 """js = get_jobstore()
