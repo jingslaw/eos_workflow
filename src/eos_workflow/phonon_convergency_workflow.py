@@ -25,6 +25,7 @@ from atomate2.abinit.jobs.response import (
 from atomate2.abinit.sets.core import StaticSetGenerator
 
 from eos_workflow.acwf_response import AcwfPhononResponseMaker
+from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eos_input_generation
 
 
 @job
@@ -94,7 +95,6 @@ def parse_phonon_files(prev_outputs):
         result.append(data)
 
     return result
-
 
 
 @job
@@ -414,3 +414,34 @@ class PhononConvergencyMaker(AcwfPhononMaker):
     with_dde: bool = False
     run_anaddb: bool = False
     run_mrgdv: bool = False
+
+
+def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None):
+    if not ecuts:
+        ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
+    structure = get_standard_structure(element, configuration)
+    phonon_results = {
+        "element": element,
+        "configuration": configuration,
+        "pseudos": pseudos,
+        "qpt_list": qpt_list,
+    }
+    phonon_jobs = []
+    for ecut in ecuts:
+        phonon_maker = PhononConvergencyMaker(qpt_list=qpt_list)
+        abinit_settings = eos_input_generation(element, configuration, ecut, pseudos, precision='debug')
+        # kpoints_settings = eos_kpoints_generation(structure, precision='phonon')
+
+        phonon_maker.static_maker.input_set_generator.user_abinit_settings = abinit_settings
+        # phonon_maker.static_maker.input_set_generator.user_kpoints_settings = kpoints_settings
+        phonon_maker.static_maker.input_set_generator.pseudos = pseudos
+        # phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"toldfe": 5e-19}
+
+        jobs = phonon_maker.make(structure=structure)
+        phonon_jobs.append(jobs)
+        for job in jobs:
+            if job.name == 'parse_phonon_files':
+                phonon_results[f"ecut-{ecut}"] = job.output
+    print_jobs = write_to_file(phonon_results)
+    phonon_jobs.append(print_jobs)
+    return Flow(phonon_jobs, name="Phonon convergency workflow", output=phonon_results)
