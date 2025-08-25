@@ -432,13 +432,13 @@ def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt
     phonon_jobs = []
     for ecut in ecuts:
         phonon_maker = PhononConvergencyMaker(qpt_list=qpt_list)
-        abinit_settings = eos_input_generation(element, configuration, ecut, pseudos, precision='debug')
+        abinit_settings = eos_input_generation(element, configuration, ecut, pseudos, precision='phonon')
         # kpoints_settings = eos_kpoints_generation(structure, precision='phonon')
 
         phonon_maker.static_maker.input_set_generator.user_abinit_settings = abinit_settings
         # phonon_maker.static_maker.input_set_generator.user_kpoints_settings = kpoints_settings
         phonon_maker.static_maker.input_set_generator.pseudos = pseudos
-        phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"toldwfr": 1e-15}
+        phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"tolwfr": 1e-15}
 
         jobs = phonon_maker.make(structure=structure)
         phonon_jobs.append(jobs)

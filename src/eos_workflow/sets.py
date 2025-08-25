@@ -114,7 +114,7 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nband": nband,
             "nstep": 100,
             "tsmear": 2.25e-3,
-            "toldwfr": 1e-22,
+            "tolwfr": 1e-22,
             "occopt": 3,
             "chkprim": 0,
             "chksymbreak": 0,

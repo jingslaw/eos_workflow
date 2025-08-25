@@ -3,7 +3,7 @@ from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eo
 from jobflow_remote import submit_flow, set_run_config
 from jobflow import run_locally
 
-element = 'Tb'
+element = 'Dy'
 # ecuts = [80, 100]
 ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
 configuration = 'FCC'
