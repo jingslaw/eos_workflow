@@ -3,11 +3,11 @@ from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eo
 from jobflow_remote import submit_flow, set_run_config
 from jobflow import run_locally
 
-element = 'Si'
-ecuts = [30, 40]
-# ecuts = [60, 70, 80, 90, 100, 125, 150]
-configuration = 'Diamond'
-pseudo = "ONCVPSP-PBE-SR-PDv0.4:standard"
+element = 'Tb'
+# ecuts = [80, 100]
+ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
+configuration = 'FCC'
+pseudo = "ONCVPSP-PBE-SR-PDv0.6:standard"
 structure = get_standard_structure(element, configuration)
 jobs = phonon_convergency_workflow(
     element,
@@ -20,6 +20,7 @@ jobs = phonon_convergency_workflow(
 jobs = set_run_config(jobs, name_filter="Merge DDB", worker="lucia_frontend")
 jobs = set_run_config(jobs, name_filter="parse_phonon_files", worker="lucia_frontend")
 jobs = set_run_config(jobs, name_filter="write_to_file", worker="lucia_frontend")
+jobs = set_run_config(jobs, name_filter="store_inputs", worker="lucia_frontend")
 
 # res = run_locally(jobs, create_folders=True)
 res = submit_flow(jobs)

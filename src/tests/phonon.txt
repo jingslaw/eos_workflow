@@ -1,0 +1,173 @@
+{
+    "element": "Eu",
+    "configuration": "Diamond",
+    "pseudos": "ONCVPSP-PBE-SR-PDv0.6:standard",
+    "qpt_list": [
+        [
+            0.5,
+            0.5,
+            0.5
+        ],
+        [
+            0.0,
+            0.0,
+            0.0
+        ]
+    ],
+    "ecut-50": [
+        {
+            "dir": "cns233.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/f5/25/12/f525126c-c80f-42b1-a1c0-d69e23bed0ad_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "phonon energies (Ha)": [
+                0.000343983,
+                0.000343983,
+                0.0006823614,
+                0.0008751604,
+                0.001057321,
+                0.001057321
+            ],
+            "phonon frequencies (cm^-1)": [
+                75.49554,
+                75.49554,
+                149.761,
+                192.0755,
+                232.0552,
+                232.0552
+            ]
+        },
+        {
+            "dir": "cns062.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/12/31/17/1231176a-9746-49a2-959a-46f32f100722_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "phonon energies (Ha)": [
+                7.069879e-05,
+                7.069879e-05,
+                7.069879e-05,
+                0.0009674701,
+                0.0009674701,
+                0.0009674701
+            ],
+            "phonon frequencies (cm^-1)": [
+                15.51659,
+                15.51659,
+                15.51659,
+                212.3351,
+                212.3351,
+                212.3351
+            ]
+        }
+    ],
+    "ecut-100": [
+        {
+            "dir": "cns064.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/be/7a/44/be7a4446-3a4e-420a-b2aa-bc2ee089dbe9_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "phonon energies (Ha)": [
+                -0.0001291437,
+                -0.0001291437,
+                0.0004429441,
+                0.0006754591,
+                0.0007619467,
+                0.0007619467
+            ],
+            "phonon frequencies (cm^-1)": [
+                -28.34377,
+                -28.34377,
+                97.21499,
+                148.2461,
+                167.228,
+                167.228
+            ]
+        },
+        {
+            "dir": "cns234.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/99/9d/1c/999d1c17-4b22-4ccf-8e75-ba6b333bc8c3_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "phonon energies (Ha)": [
+                0.0001345894,
+                0.0001345894,
+                0.0001345894,
+                0.0007250455,
+                0.0007250455,
+                0.0007250455
+            ],
+            "phonon frequencies (cm^-1)": [
+                29.53895,
+                29.53895,
+                29.53895,
+                159.1291,
+                159.1291,
+                159.1291
+            ]
+        }
+    ],
+    "ecut-150": [
+        {
+            "dir": "cns226.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/e8/61/6c/e8616c4f-f8b1-40bd-ada8-46c00a847969_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "phonon energies (Ha)": [
+                -0.0001365092,
+                -0.0001365092,
+                0.0004407595,
+                0.0006739538,
+                0.0007606372,
+                0.0007606372
+            ],
+            "phonon frequencies (cm^-1)": [
+                -29.96032,
+                -29.96032,
+                96.73553,
+                147.9158,
+                166.9406,
+                166.9406
+            ]
+        },
+        {
+            "dir": "cns064.lucia.cenaero.be:/gpfs/scratch/acad/batwal/wjing/jobflow/10/eb/b8/10ebb8cf-92da-49c6-8341-e8d29fda3ce5_1",
+            "calculation state": "successful",
+            "phonon wavevector": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "phonon energies (Ha)": [
+                0.0001280081,
+                0.0001280081,
+                0.0001280081,
+                0.0007233527,
+                0.0007233527,
+                0.0007233527
+            ],
+            "phonon frequencies (cm^-1)": [
+                28.09452,
+                28.09452,
+                28.09452,
+                158.7576,
+                158.7576,
+                158.7576
+            ]
+        }
+    ]
+}

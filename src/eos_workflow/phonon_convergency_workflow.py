@@ -26,6 +26,7 @@ from atomate2.abinit.sets.core import StaticSetGenerator
 
 from eos_workflow.acwf_response import AcwfPhononResponseMaker
 from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eos_input_generation
+from eos_workflow.utilities import ATOM_NUMBERS_IN_CONFIG
 
 
 @job
@@ -437,7 +438,7 @@ def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt
         phonon_maker.static_maker.input_set_generator.user_abinit_settings = abinit_settings
         # phonon_maker.static_maker.input_set_generator.user_kpoints_settings = kpoints_settings
         phonon_maker.static_maker.input_set_generator.pseudos = pseudos
-        # phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"toldfe": 5e-19}
+        phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"toldwfr": 1e-15}
 
         jobs = phonon_maker.make(structure=structure)
         phonon_jobs.append(jobs)
