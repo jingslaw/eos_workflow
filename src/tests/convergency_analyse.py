@@ -4,7 +4,7 @@ import numpy as np
 import csv
 
 
-def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=None, csv_output=True):
+def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=None, csv_output=True, abs_val=True):
     """
     Plot phonon frequencies vs cutoff energy and optionally export errors as CSV.
 
@@ -74,6 +74,9 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
         for mode in range(num_modes):
             y = [f[mode] for f in freqs]
             ref = ref_freqs[tuple(qpt)][mode]
+            if abs_val is True:
+                y = [abs(i) for i in y]
+                ref = abs(ref)
 
             # Compute errors for CSV
             errors = []
