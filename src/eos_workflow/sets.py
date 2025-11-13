@@ -190,7 +190,7 @@ def get_standard_structure(element, configuration):
     base_structure_module = "eos_workflow.statics.structures"
 
     # uppercase configuration
-    if configuration == "LAN":
+    if configuration == "RE":
         # use LAN-nitrides of Wenzovich paper
         # from typical (gs) cif folder
         p_ctx = resources.path(f"{base_structure_module}.gs", f"{element}N.cif")
