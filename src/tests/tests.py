@@ -14,7 +14,7 @@ element = 'Eu'
 # configurations = ['BCC', 'FCC', 'SC', 'Diamond']
 small_config = ['BCC', 'Diamond', 'XO', 'XO2', 'XO3', 'X2O']
 rest = ['FCC', 'SC', 'X2O3', 'X2O5']
-configurations = ['LAN']
+configurations = ['RE']
 for ecut in [100]:
     eos = eos_workflows(element, ecut, pseudos,
                         precision="debug",

@@ -45,7 +45,7 @@ ACWF_CONFIGURATIONS = UNARIE_CONFIGURATIONS + OXIDE_CONFIGURATIONS
 
 ATOM_NUMBERS_IN_CONFIG = {'FCC': (1, ), 'BCC': (1, ), 'SC': (1, ), "Diamond": (2, ),
                           "X2O": (2, 1), "XO": (1, 1), "X2O3": (4, 6), "XO2": (1, 2), "X2O5": (4, 10), "XO3": (1, 3),
-                          "LAN": (1, 1)
+                          "RE": (1, 1)
                           }
 
 
