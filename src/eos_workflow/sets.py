@@ -60,6 +60,13 @@ def nband_calculation(element, configuration, pseudos):
             print(f"ERROR: PseudoTable does not have pseudos of element O ")
             exit(-1)
         nband += pps.Z_val * numbers[1] / 2
+    if configuration == "LAN":
+        try:
+            pps = pseudos.pseudo_with_symbol('N')
+        except AttributeError:
+            print(f"ERROR: PseudoTable does not have pseudos of element N ")
+            exit(-1)
+        nband += pps.Z_val * numbers[1] / 2
     return ceil(nband)
 
 
@@ -113,11 +120,12 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "ecut": ecut,
             "nband": nband,
             "nstep": 100,
-            # "tsmear": 2.25e-3,
-            "tolwfr": 1e-22,
+            "tsmear": 0.01,   # 6.25e-3,   # 2.25e-3,
+            # "tolwfr": 1e-22,
+            # "toldff": 5e-6,
             # "toldff": 1e-10,
             # "toldfe": 5.0e-11 * natom,
-            # "occopt": 3,
+            "occopt": 3,
             "chkprim": 0,
             "chksymbreak": 0,
             # "autoparal": 1,
@@ -219,5 +227,5 @@ if __name__ == "__main__":
     lanthanide = "/home/wjing/PycharmProjects/abinit_fireworks/Nd-4f.psp8"
     oxygen = "/home/wjing/PycharmProjects/abinit_fireworks/O.psp8"
     pseudo_files = [lanthanide, oxygen]
-    result = eos_input_generation('Nd', 'XO2', 100, pseudo_files)
+    result = eos_input_generation('Nd', 'LAN', 100, "ONCVPSP-PBE-SR-PDv0.6:standard")
     print(result)

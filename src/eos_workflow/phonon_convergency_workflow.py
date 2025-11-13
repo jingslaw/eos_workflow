@@ -74,7 +74,7 @@ def parse_phonon_files(prev_outputs):
 
             # Match phonon frequencies (cm-1) capture multiple lines
             freq_match = re.search(
-                r"Phonon frequencies in cm-1\s*:\s*([\s\S]*?)(?=\n\s*\n|\n\s*Phonon|$)",
+                r"Phonon frequencies in cm-1\s*:\s*((?:[-+0-9Ee.\s]+)+)",
                 text
             )
             if freq_match:
@@ -156,7 +156,8 @@ class AcwfDfptFlowMaker(Maker):
     """
 
     name: str = "DFPT"
-    relax_maker: BaseAbinitMaker = field(default_factory=lambda: RelaxMaker.full_relaxation())
+    relax_maker1: BaseAbinitMaker = field(default_factory=lambda: RelaxMaker.full_relaxation())
+    # relax_maker2: BaseAbinitMaker = field(default_factory=lambda: RelaxMaker.full_relaxation())
     static_maker: BaseAbinitMaker = field(
         default_factory=lambda: StaticMaker(
             input_set_generator=StaticSetGenerator(factory=scf_for_phonons)
@@ -236,11 +237,15 @@ class AcwfDfptFlowMaker(Maker):
             A DFPT flow
         """
         jobs = []
-        relax_job = self.relax_maker.make(structure=structure)
-        jobs.append(relax_job)
+        # relax_job1 = self.relax_maker1.make(structure=structure)
+        # jobs.append(relax_job1)
+        # relax_job2 = self.relax_maker2.make(structure=relax_job1.output.structure, prev_outputs=relax_job1.output.dir_name)
+        # jobs.append(relax_job2)
+
         static_maker = self.static_maker
         static_job = static_maker.make(
-            structure=relax_job.output.structure,
+            # structure=relax_job1.output.structure,
+            structure=structure,
         )
         jobs.append(static_job)
 
@@ -424,6 +429,7 @@ class PhononConvergencyMaker(AcwfPhononMaker):
 
 
 def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None):
+    from copy import deepcopy
     if not ecuts:
         ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
     structure = get_standard_structure(element, configuration)
@@ -442,12 +448,29 @@ def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt
         else:
             phonon_maker = PhononConvergencyMaker(qpt_list=qpt_list, mrgddb_maker=None)
         abinit_settings = eos_input_generation(element, configuration, ecut, pseudos, precision='phonon')
-        # kpoints_settings = eos_kpoints_generation(structure, precision='phonon')
+        # ngkpt = [16, 16, 16]
+        # kpoints_settings = KSampling.monkhorst(ngkpt, shiftk=(0.0, 0.0, 0.0))
+        kpoints_settings = eos_kpoints_generation(structure, precision='phonon')
 
-        phonon_maker.relax_maker.input_set_generator.user_abinit_settings = abinit_settings
-        # phonon_maker.static_maker.input_set_generator.user_kpoints_settings = kpoints_settings
-        phonon_maker.relax_maker.pseudos = pseudos
-        phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"tolwfr": 1e-13}
+        relax_settings = deepcopy(abinit_settings)
+        relax_settings.update({"tolrff": 0.02})
+        phonon_maker.relax_maker1.input_set_generator.user_abinit_settings = relax_settings
+        phonon_maker.relax_maker1.input_set_generator.user_kpoints_settings = kpoints_settings
+        phonon_maker.relax_maker1.input_set_generator.pseudos = pseudos
+
+        # relax_settings2 = deepcopy(abinit_settings)
+        # relax_settings2.update({"tolmxf": 5e-3, "chkdilatmx": 0})
+        # phonon_maker.relax_maker2.input_set_generator.user_abinit_settings = relax_settings2
+        # phonon_maker.relax_maker2.input_set_generator.user_kpoints_settings = kpoints_settings
+        # phonon_maker.relax_maker2.input_set_generator.pseudos = pseudos
+
+        # abinit_settings.pop("toldff")
+        abinit_settings.update({"tolwfr": 1e-22, "nc_xccc_gspace": 1})
+        phonon_maker.static_maker.input_set_generator.user_abinit_settings = abinit_settings
+        phonon_maker.static_maker.input_set_generator.user_kpoints_settings = kpoints_settings
+        phonon_maker.static_maker.input_set_generator.pseudos = pseudos
+
+        phonon_maker.phonon_maker.input_set_generator.user_abinit_settings = {"tolvrs": 1e-10}
 
         jobs = phonon_maker.make(structure=structure)
         phonon_jobs.append(jobs)

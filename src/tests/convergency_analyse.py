@@ -2,9 +2,18 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+from abipy.tools.plotting import add_fig_kwargs
 
 
-def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=None, csv_output=True, abs_val=True):
+def plot_phonon_vs_ecut(
+    filename,
+    acoustic_only=True,
+    y_ranges=None,
+    error_type=None,
+    csv_output=True,
+    y_horizon_lines=None,
+    abs_val=True,
+):
     """
     Plot phonon frequencies vs cutoff energy and optionally export errors as CSV.
 
@@ -23,6 +32,9 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
         'rel_error': plot relative error wrt f(Ecut_ref).
     csv_output : bool
         If True, write a CSV file with frequencies and errors.
+    y_horizon_lines : dict[tuple, float] or None
+        Optional dict mapping q-point tuples -> y-value. Draws a dashed horizontal
+        line at that y-value for the corresponding subplot.
     """
 
     # Load data
@@ -58,7 +70,7 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
     csv_rows = []
 
     # Plot
-    fig, axes = plt.subplots(len(qpts), 1, figsize=(6, 4*len(qpts)), sharex=True)
+    fig, axes = plt.subplots(len(qpts), 1, figsize=(6, 4 * len(qpts)), sharex=True)
     if len(qpts) == 1:
         axes = [axes]
 
@@ -92,7 +104,7 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
             for i, ec in enumerate(ecut):
                 csv_rows.append({
                     "qpt": qpt,
-                    "mode": mode+1,
+                    "mode": mode + 1,
                     "ecut": ec,
                     "freq": y[i],
                     "ref_freq": ref,
@@ -125,6 +137,16 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
                     ax.plot(ecut[i], y_plot[i], "o", color=f"C{mode}")
                 else:
                     ax.plot(ecut[i], y_plot[i], "x", color="r", markersize=8, markeredgewidth=2)
+
+        # === Draw horizontal line if requested ===
+        if y_horizon_lines and tuple(qpt) in y_horizon_lines:
+            ax.axhline(y=y_horizon_lines[tuple(qpt)], color="k", linestyle="--", linewidth=1)
+            ax.text(
+                1.01, y_horizon_lines[tuple(qpt)],
+                f"y={y_horizon_lines[tuple(qpt)]:.2f}",
+                transform=ax.get_yaxis_transform(),
+                va="center", ha="left", fontsize=9, color="k"
+            )
 
         ax.set_title(f"q-point {qpt}")
         ax.set_ylabel(ylabel)
@@ -168,7 +190,31 @@ def plot_phonon_vs_ecut(filename, acoustic_only=True, y_ranges=None, error_type=
                 writer.writerow(row)
         print(f"Saved results to {csv_file}")
 
+    return fig
 
-if __name__ == "__main__":
-    # For Diamond only acoustic modes
-    plot_phonon_vs_ecut("phonon.txt", acoustic_only=True)
+
+@add_fig_kwargs
+def phonon_inspect(y_range, y_lines, filename="phonon.txt"):
+    fig = plot_phonon_vs_ecut(
+        filename,
+        acoustic_only=True,
+        y_ranges=y_range,
+        error_type="abs_error",
+        y_horizon_lines=y_lines,
+        abs_val=False,
+    )
+    return fig
+
+
+"""if __name__ == "__main__":
+    filename = "phonon.txt"
+    y_range = {(0.0, 0.0, 0.0): (0, 100), (0.5, 0.5, 0.5): (0, 10)}
+    y_lines = {(0.0, 0.0, 0.0): 1.0, (0.5, 0.5, 0.5): 1.0}
+    plot_phonon_vs_ecut(
+        filename,
+        acoustic_only=True,
+        y_ranges=y_range,
+        error_type="abs_error",
+        y_horizon_lines=y_lines,
+        abs_val=False,
+    )"""

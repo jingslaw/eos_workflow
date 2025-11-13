@@ -9,20 +9,18 @@ def print_stucture(test):
     return test.output
 
 
-element = 'Si'
-ecuts = [30]
+element = 'Ce'
+ecuts = [40]
 # ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
 configuration = 'BCC'
-pseudo = "ONCVPSP-PBE-SR-PDv0.4:standard"
+pseudo = "ONCVPSP-PBE-SR-PDv0.6:standard"
 p = "/home/wjing/.abinit/pseudos/ONCVPSP-PBE-SR-PDv0.6/Si/Si.psp8"
 structure = get_standard_structure(element, configuration)
 
 rlx = RelaxMaker.full_relaxation()
-rlx.input_set_generator.user_abinit_settings = {"tolmxf": None, "toldfe": 1e-8}
+rlx.input_set_generator.pseudos = pseudo
 job = rlx.make(structure=structure)
-static = StaticMaker()
-job2 = static.make(structure=job.output.structure)
 
 # job2 = print_stucture(job.output)
-res = run_locally([job, job2], create_folders=True)
+res = run_locally([job], create_folders=True)
 print(res)

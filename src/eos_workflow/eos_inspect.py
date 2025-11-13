@@ -1,6 +1,7 @@
 import os
 import json
 import click
+import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,6 +9,7 @@ from math import ceil
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
 from eos_workflow.workflows import sum_up
 from jobflow_remote import get_jobstore
+from abipy.tools.plotting import add_fig_kwargs
 
 __version__ = "0.0.1"
 NUM_OF_VOLUMES = 7
@@ -15,7 +17,7 @@ NUM_OF_VOLUMES = 7
 
 # referred from aiida_sssp_workflow.cli.inspect and considered birch-murnaghan fitting failed case of PS
 def eos_plot(
-    ax, ref_ae_data, energy0, volumes, energies, line_data=None, nu=None, title="EOS", fontsize=8
+    ax, ref_ae_data, energy0, volumes, energies, line_data=None, nu=None, title="EOS", fontsize=8,
 ):
     """plot EOS result on ax"""
     dense_volume_max = max(volumes)
@@ -118,6 +120,7 @@ def convergence_plot(
     ax.set_title(title, fontsize=8)
 
 
+@add_fig_kwargs
 def eos_inspect(filepath="eos_fitting_results.json"):
     with open(filepath, 'r') as fp:
         eos_results = json.load(fp)
@@ -150,6 +153,7 @@ def eos_inspect(filepath="eos_fitting_results.json"):
         # fig to pdf
         fig.tight_layout()
         fig.savefig(f"{element}_precision.pdf", bbox_inches="tight")
+        return fig
 
 
 def converge_inspect(filepath="eos_converge_results.json"):
@@ -337,3 +341,204 @@ def collect_eos_results(data):
     df.index = df.index + 1
     df = df.round(3)
     df.to_csv('eos_results.csv')
+
+
+def plot_phonon_vs_ecut(
+    filename,
+    acoustic_only=True,
+    y_ranges=None,
+    error_type=None,
+    csv_output=True,
+    y_horizon_lines=None,
+    abs_val=True,
+):
+    """
+    Plot phonon frequencies vs cutoff energy and optionally export errors as CSV.
+
+    Parameters
+    ----------
+    filename : str
+        Path to JSON data file.
+    acoustic_only : bool
+        Whether to plot only acoustic modes (default: True).
+    y_ranges : dict[tuple, (ymin, ymax)]
+        Optional dict mapping q-point tuples -> (ymin, ymax) for y-axis limits.
+    error_type : str or None
+        None: plot frequencies directly.
+        'error': plot f(Ecut) - f(Ecut_ref).
+        'abs_error': plot |f(Ecut) - f(Ecut_ref)|.
+        'rel_error': plot relative error wrt f(Ecut_ref).
+    csv_output : bool
+        If True, write a CSV file with frequencies and errors.
+    y_horizon_lines : dict[tuple, float] or None
+        Optional dict mapping q-point tuples -> y-value. Draws a dashed horizontal
+        line at that y-value for the corresponding subplot.
+    """
+
+    # Load data
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    qpts = data["qpt_list"]
+    ecut_keys = [k for k in data.keys() if k.startswith("ecut-")]
+    ecut_keys_sorted = sorted(ecut_keys, key=lambda x: int(x.split("-")[1]))
+
+    # Map q-points to collected data
+    qpt_results = {tuple(q): {"ecut": [], "freqs": [], "state": []} for q in qpts}
+
+    for ecut_key in ecut_keys_sorted:
+        ecut = int(ecut_key.split("-")[1])
+        for entry in data[ecut_key]:
+            qpt = tuple(entry["phonon wavevector"])
+            freqs = entry["phonon frequencies (cm^-1)"]
+            state = entry["calculation state"]
+
+            qpt_results[qpt]["ecut"].append(ecut)
+            qpt_results[qpt]["freqs"].append(freqs)
+            qpt_results[qpt]["state"].append(state)
+
+    # Reference cutoff (largest cutoff available, e.g. 150 Ha)
+    ref_key = max(ecut_keys_sorted, key=lambda x: int(x.split("-")[1]))
+    ref_freqs = {}
+    for entry in data[ref_key]:
+        qpt = tuple(entry["phonon wavevector"])
+        ref_freqs[qpt] = entry["phonon frequencies (cm^-1)"]
+
+    # Prepare CSV rows
+    csv_rows = []
+
+    # Plot
+    fig, axes = plt.subplots(len(qpts), 1, figsize=(6, 4 * len(qpts)), sharex=True)
+    if len(qpts) == 1:
+        axes = [axes]
+
+    for ax, qpt in zip(axes, qpts):
+        ecut = qpt_results[tuple(qpt)]["ecut"]
+        freqs = qpt_results[tuple(qpt)]["freqs"]
+        states = qpt_results[tuple(qpt)]["state"]
+
+        num_modes = len(freqs[0])
+        if acoustic_only:
+            num_modes = min(3, num_modes)  # only 3 acoustic branches
+
+        for mode in range(num_modes):
+            y = [f[mode] for f in freqs]
+            ref = ref_freqs[tuple(qpt)][mode]
+            if abs_val is True:
+                y = [abs(i) for i in y]
+                ref = abs(ref)
+
+            # Compute errors for CSV
+            errors = []
+            abs_errors = []
+            rel_errors = []
+            for val in y:
+                delta = val - ref
+                errors.append(delta)
+                abs_errors.append(abs(delta))
+                rel_errors.append(np.nan if abs(ref) < 1e-6 else abs(delta) / abs(ref))
+
+            # Write CSV rows
+            for i, ec in enumerate(ecut):
+                csv_rows.append({
+                    "qpt": qpt,
+                    "mode": mode + 1,
+                    "ecut": ec,
+                    "freq": y[i],
+                    "ref_freq": ref,
+                    "error": errors[i],
+                    "abs_error": abs_errors[i],
+                    "rel_error": rel_errors[i],
+                    "state": states[i],
+                })
+
+            # Decide what to plot
+            if error_type == "error":
+                y_plot = errors
+                ylabel = "Error (cm$^{-1}$)"
+            elif error_type == "abs_error":
+                y_plot = abs_errors
+                ylabel = "Absolute Error (cm$^{-1}$)"
+            elif error_type == "rel_error":
+                y_plot = rel_errors
+                ylabel = "Relative Error"
+            else:
+                y_plot = y
+                ylabel = "Frequency (cm$^{-1}$)"
+
+            # Draw connecting line
+            ax.plot(ecut, y_plot, "-", color=f"C{mode}", label=f"Acoustic {mode+1}")
+
+            # Overlay markers
+            for i in range(len(ecut)):
+                if states[i] == "successful":
+                    ax.plot(ecut[i], y_plot[i], "o", color=f"C{mode}")
+                else:
+                    ax.plot(ecut[i], y_plot[i], "x", color="r", markersize=8, markeredgewidth=2)
+
+        # === Draw horizontal line if requested ===
+        if y_horizon_lines and tuple(qpt) in y_horizon_lines:
+            ax.axhline(y=y_horizon_lines[tuple(qpt)], color="k", linestyle="--", linewidth=1)
+            ax.text(
+                1.01, y_horizon_lines[tuple(qpt)],
+                f"y={y_horizon_lines[tuple(qpt)]:.2f}",
+                transform=ax.get_yaxis_transform(),
+                va="center", ha="left", fontsize=9, color="k"
+            )
+
+        ax.set_title(f"q-point {qpt}")
+        ax.set_ylabel(ylabel)
+        ax.grid(True)
+
+        # Apply user-provided y-limits
+        if y_ranges and tuple(qpt) in y_ranges:
+            ax.set_ylim(y_ranges[tuple(qpt)])
+
+        # Legend
+        handles, labels = ax.get_legend_handles_labels()
+        if "Unconverged" not in labels:
+            handles.append(plt.Line2D([0], [0], color="r", marker="x",
+                                      linestyle="None", markersize=8,
+                                      markeredgewidth=2))
+            labels.append("Unconverged")
+        ax.legend(handles, labels)
+
+    axes[-1].set_xlabel("Ecut (Ha)")
+
+    element = data.get("element", "")
+    config = data.get("configuration", "")
+    title = f"{element} - {config}"
+    if error_type:
+        title += f" ({error_type})"
+    plt.suptitle(title, fontsize=14, fontweight="bold")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(f"{element}-{config}-convergency-{error_type or 'freqs'}.pdf")
+    plt.show()
+
+    # === Save CSV ===
+    if csv_output:
+        csv_file = f"{element}-{config}-convergency-data.csv"
+        with open(csv_file, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=[
+                "qpt", "mode", "ecut", "freq", "ref_freq", "error", "abs_error", "rel_error", "state"
+            ])
+            writer.writeheader()
+            for row in csv_rows:
+                writer.writerow(row)
+        print(f"Saved results to {csv_file}")
+
+    return fig
+
+
+@add_fig_kwargs
+def phonon_inspect(y_range, y_lines, filename="phonon.txt"):
+    fig = plot_phonon_vs_ecut(
+        filename,
+        acoustic_only=True,
+        y_ranges=y_range,
+        error_type="abs_error",
+        y_horizon_lines=y_lines,
+        abs_val=False,
+    )
+    return fig

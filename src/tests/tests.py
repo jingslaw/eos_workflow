@@ -4,17 +4,17 @@ from eos_workflow.eos_workflow import eos_workflow
 from eos_workflow.workflows import eos_workflows, eos_converge_workflows
 from jobflow import run_locally
 from jobflow_remote import submit_flow, set_run_config, get_jobstore
-from eos_workflow.inspect import collect_results
+from eos_workflow.eos_inspect import collect_results
 from eos_workflow.sets import EosDoc
 
-pseudos = "ONCVPSP-PBE-SR-PDv0.5:standard"
+pseudos = "ONCVPSP-PBE-SR-PDv0.6:standard"
 
 element = 'Eu'
 # configurations = ['XO', 'XO2', 'XO3', 'X2O', 'X2O3', 'X2O5']
 # configurations = ['BCC', 'FCC', 'SC', 'Diamond']
-small_config = ['BCC', 'Diamond', 'X2O', 'XO', 'XO2', 'XO3']
+small_config = ['BCC', 'Diamond', 'XO', 'XO2', 'XO3', 'X2O']
 rest = ['FCC', 'SC', 'X2O3', 'X2O5']
-configurations = ['BCC']
+configurations = ['LAN']
 for ecut in [100]:
     eos = eos_workflows(element, ecut, pseudos,
                         precision="debug",
@@ -30,6 +30,7 @@ for ecut in [100]:
     eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="lucia_frontend")
     eos = set_run_config(eos, name_filter="export_result", worker="lucia_frontend")
     eos = set_run_config(eos, name_filter="export_single_workflow", worker="lucia_frontend")
+    eos = set_run_config(eos, name_filter="store_inputs", worker="lucia_frontend")
     result = submit_flow(eos)
 
 """eos = set_run_config(eos, name_filter="eos_check", worker="manneback_frontend")
