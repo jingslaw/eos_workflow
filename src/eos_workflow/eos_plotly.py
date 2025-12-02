@@ -5,6 +5,7 @@ from math import ceil
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
 
 
 # ---------------------------
@@ -35,6 +36,8 @@ def eos_plot_plotly(
         b1=ref_b1,
     )
 
+    show_legend = (row == 1 and col == 1)
+
     # ---- RAW data points ----
     fig.add_trace(
         go.Scatter(
@@ -43,6 +46,7 @@ def eos_plot_plotly(
             mode="markers",
             name="RAW equation of state",
             marker=dict(size=6, color="blue"),
+            show_legend=show_legend,
         ),
         row=row,
         col=col,
@@ -56,6 +60,7 @@ def eos_plot_plotly(
             mode="lines",
             name="AE",
             line=dict(dash="dash", color="red"),
+            show_legend=show_legend,
         ),
         row=row,
         col=col,
@@ -80,6 +85,7 @@ def eos_plot_plotly(
                 mode="lines",
                 name="Pseudo",
                 line=dict(color="blue"),
+                show_legend=show_legend,
             ),
             row=row,
             col=col,
