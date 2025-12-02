@@ -45,7 +45,7 @@ def eos_plot_plotly(
             y=energies,
             mode="markers",
             name="RAW equation of state",
-            marker=dict(size=6, color="blue"),
+            marker=dict(size=10, color="blue"),
             showlegend=show_legend,
         ),
         row=row,
@@ -116,12 +116,16 @@ def eos_plot_plotly(
 
     # ---- ν annotation ----
     if nu:
-        center_x = (max(volumes) + min(volumes)) / 2
-        center_y = (max(energies) + min(energies)) / 2
+        x_min, x_max = min(volumes), max(volumes)
+        y_min, y_max = min(energies), max(energies)
+
+        # Place annotation at 3/4 of x-range, 90% of y-range
+        ann_x = x_min + 0.75 * (x_max - x_min)
+        ann_y = y_min + 0.9 * (y_max - y_min)
 
         fig.add_annotation(
-            x=center_x,
-            y=center_y,
+            x=ann_x,
+            y=ann_y,
             text=f"ν = {round(nu,3)}",
             showarrow=False,
             row=row,
@@ -163,8 +167,8 @@ def eos_inspect_plotly(filepath="eos_fitting_results.json", save_html=True):
             rows=rows,
             cols=cols,
             subplot_titles=[f"EOS of {cfg}" for cfg in results.keys()],
-            vertical_spacing=0.08,
-            horizontal_spacing=0.08,
+            vertical_spacing=0.02,
+            horizontal_spacing=0.02,
         )
 
         i = 0
@@ -206,7 +210,7 @@ def eos_inspect_plotly(filepath="eos_fitting_results.json", save_html=True):
             i += 1
 
         fig.update_layout(
-            title=f"{element} EOS precision check",
+            # title=f"{element} EOS precision check",
             height=350 * rows,
             width=900,
             showlegend=True,
