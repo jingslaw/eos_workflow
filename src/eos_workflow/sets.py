@@ -115,6 +115,21 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nsppol": 1,
             "nspden": 1,
         }
+    elif precision == "LnN":
+        eos_settings = {
+            "ecut": ecut,
+            "nband": nband,
+            "nstep": 100,
+            "tsmear": 2.25e-3,
+            "toldfe": 5.0e-9 * natom,
+            "occopt": 3,
+            "chkprim": 0,
+            "chksymbreak": 0,
+            # "autoparal": 1,
+            "nspinor": 1,
+            "nsppol": 2,
+            "nspden": 2,
+        }
     elif precision == "phonon":
         eos_settings = {
             "ecut": ecut,

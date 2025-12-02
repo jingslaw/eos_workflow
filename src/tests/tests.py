@@ -7,14 +7,14 @@ from jobflow_remote import submit_flow, set_run_config, get_jobstore
 from eos_workflow.eos_inspect import collect_results
 from eos_workflow.sets import EosDoc
 
-pseudos = "ONCVPSP-PBE-SR-PDv0.6:standard"
+pseudos = "ONCVPSP-PBE-SR-PDv1.0:standard"
 
-element = 'Eu'
+element = 'Sm'
 # configurations = ['XO', 'XO2', 'XO3', 'X2O', 'X2O3', 'X2O5']
 # configurations = ['BCC', 'FCC', 'SC', 'Diamond']
 small_config = ['BCC', 'Diamond', 'XO', 'XO2', 'XO3', 'X2O']
 rest = ['FCC', 'SC', 'X2O3', 'X2O5']
-configurations = ['RE']
+configurations = ['X2O3']
 for ecut in [100]:
     eos = eos_workflows(element, ecut, pseudos,
                         precision="debug",
