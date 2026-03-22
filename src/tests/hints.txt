@@ -1,0 +1,118 @@
+{
+    "energy_unit": "eV",
+    "element": "Ce",
+    "configuration": "FCC",
+    "pseudos": "ONCVPSP-PBE-SR-PDv0.6:standard",
+    "ecut-30": {
+        "task_state": "successful",
+        "energy": -2153.3857872849876
+    },
+    "ecut-35": {
+        "task_state": "successful",
+        "energy": -2154.74905724426
+    },
+    "ecut-40": {
+        "task_state": "successful",
+        "energy": -2155.54406207799
+    },
+    "ecut-45": {
+        "task_state": "successful",
+        "energy": -2155.7782919989704
+    },
+    "ecut-46": {
+        "task_state": "successful",
+        "energy": -2155.794911423829
+    },
+    "ecut-47": {
+        "task_state": "successful",
+        "energy": -2155.8059531866434
+    },
+    "ecut-48": {
+        "task_state": "successful",
+        "energy": -2155.8132259672057
+    },
+    "ecut-49": {
+        "task_state": "successful",
+        "energy": -2155.81780353012
+    },
+    "ecut-50": {
+        "task_state": "successful",
+        "energy": -2155.820425477335
+    },
+    "ecut-51": {
+        "task_state": "successful",
+        "energy": -2155.821883522177
+    },
+    "ecut-52": {
+        "task_state": "successful",
+        "energy": -2155.822685798195
+    },
+    "ecut-53": {
+        "task_state": "successful",
+        "energy": -2155.8230935981514
+    },
+    "ecut-54": {
+        "task_state": "successful",
+        "energy": -2155.823275860468
+    },
+    "ecut-55": {
+        "task_state": "successful",
+        "energy": -2155.823345035272
+    },
+    "ecut-60": {
+        "task_state": "successful",
+        "energy": -2155.823472181828
+    },
+    "ecut-65": {
+        "task_state": "successful",
+        "energy": -2155.82363645115
+    },
+    "ecut-70": {
+        "task_state": "successful",
+        "energy": -2155.8236950604673
+    },
+    "ecut-75": {
+        "task_state": "successful",
+        "energy": -2155.823800664495
+    },
+    "ecut-80": {
+        "task_state": "successful",
+        "energy": -2155.8239630332487
+    },
+    "ecut-85": {
+        "task_state": "successful",
+        "energy": -2155.824066122502
+    },
+    "ecut-90": {
+        "task_state": "successful",
+        "energy": -2155.8241025766793
+    },
+    "ecut-95": {
+        "task_state": "successful",
+        "energy": -2155.8241354043707
+    },
+    "ecut-100": {
+        "task_state": "successful",
+        "energy": -2155.8242080176624
+    },
+    "ecut-110": {
+        "task_state": "successful",
+        "energy": -2155.824376219912
+    },
+    "ecut-120": {
+        "task_state": "successful",
+        "energy": -2155.8244219533894
+    },
+    "ecut-130": {
+        "task_state": "successful",
+        "energy": -2155.8244305669377
+    },
+    "ecut-140": {
+        "task_state": "successful",
+        "energy": -2155.8244577690393
+    },
+    "ecut-150": {
+        "task_state": "successful",
+        "energy": -2155.8244745636284
+    }
+}

@@ -14,12 +14,12 @@
                 27.693455604748024
             ],
             "energies": [
-                -2733.9175701783483,
-                -2733.9398110988136,
-                -2733.9467699398497,
-                -2733.954701420055,
-                -2733.9206104585164,
-                -2733.921831574687,
+                -2733.9175701783483, 
+                -2733.9398110988136, 
+                -2733.9467699398497, 
+                -2733.954701420055, 
+                -2733.9206104585164, 
+                -2733.921831574687, 
                 -2733.92158644842
             ],
             "scaling_factors": [
@@ -32,8 +32,8 @@
                 1.06
             ],
             "eta_min": 0.98,
-            "eos_is_converged": false,
-            "eos_failed_problems": "\\nWARNING: The behavior of eos curve is bad.\\n",
+            "eos_is_converged": False,
+            "eos_failed_problems": '\nWARNING: The behavior of eos curve is bad.\n',
             "energy0": -2733.954701420055,
             "birch_murnaghan_results": [
                 26.2245181,

@@ -112,10 +112,12 @@ def sum_up(workflow_outputs, num_of_volumes=None) -> EosDoc:
 
 
 @job
-def export_result(workflow_results, file_name="eos_fitting_results.json"):
+def export_result(workflow_results, file_name="eos_fitting_results.json", sum_up_tag=False):
+    eos_result = None
     with open(file_name, 'w') as fp:
         json.dump(workflow_results, fp, indent=4)
-    eos_result = sum_up(workflow_results)
+    if sum_up_tag:
+        eos_result = sum_up(workflow_results)
     return eos_result
 
 
@@ -149,24 +151,34 @@ def eos_workflows(
 
 
 @job
-def converge_results(element, configuration, ecuts, outputs, print_raw=True):
-    nu = []
-    delta = []
-    for output in outputs:
-        if output["eos_is_converged"]:
-            nu.append(output["rel_errors_vec_length"])
-            delta.append(output["delta/natoms"])
-        else:
-            nu.append("NaN")
-            delta.append("NaN")
+def converge_results(element, configuration, ecuts, pseudos, outputs, print_raw=True):
     results = {
         "element": element,
         "configuration": configuration,
-        "ecut": ecuts,
-        "nu": nu,
-        "delta/natoms": delta,
-        "delta/natoms unit": "meV/natoms"
+        "pseudos": pseudos,
     }
+    ref = None
+    i = 0
+    for output in outputs:
+        tmp = {
+            "eos_is_converged": False,
+            'nu': None,
+            'delta/natoms': None,
+            'delta1': None,
+            'v0_b0_b1': None,
+        }
+        if output["eos_is_converged"]:
+            tmp['nu'] = output["rel_errors_vec_length"]
+            tmp['delta/natoms'] = output["delta/natoms"]
+            tmp['eos_is_converged'] = output["eos_is_converged"]
+            tmp['v0_b0_b1'] = output["birch_murnaghan_results"]
+            ref = output["reference_ae_V0_B0_B1"]
+        results.update({f'ecut-{ecuts[i]}': tmp})
+        i += 1
+    results.update(
+        {"reference_ae_V0_B0_B1": ref,
+         "delta/natoms unit": "meV/natoms"}
+    )
     if print_raw is True:
         results.update({"raw": outputs})
     return results
@@ -182,9 +194,9 @@ def eos_converge_workflows(
 ):
     if ecuts is None:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
-            ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 120, 150]
+            ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
         else:
-            ecuts = [15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 45, 50, 60, 75, 100]
+            ecuts = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
     workflows = []
     outputs = []
     for ecut in ecuts:
@@ -199,6 +211,6 @@ def eos_converge_workflows(
         workflows.append(workflow)
         outputs.append(workflow.output)
     flow = Flow(workflows, output=outputs)
-    result = converge_results(element, configuration, ecuts, flow.output)
+    result = converge_results(element, configuration, ecuts, pseudos, flow.output)
     return Flow([flow, result, export_result(result.output, file_name="eos_converge_results.json")],
                 name=f"eos-converge-{element}")

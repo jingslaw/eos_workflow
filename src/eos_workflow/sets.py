@@ -19,6 +19,8 @@ from eos_workflow.utilities import (
 )
 
 EOS_PREV_OUTPUTS_DEPS = (f"{SCF}:WFK",)
+LANTHANIDE_3 = {'La': 0, 'Ce': 0, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
+                'Tb': 6, 'Dy': 5, 'Ho': 4, 'Er': 3, 'Tm': 2, 'Yb': 0, 'Lu': 0}
 
 
 class EosDoc(BaseModel):
@@ -60,7 +62,7 @@ def nband_calculation(element, configuration, pseudos):
             print(f"ERROR: PseudoTable does not have pseudos of element O ")
             exit(-1)
         nband += pps.Z_val * numbers[1] / 2
-    if configuration == "LAN":
+    if configuration == "RE":
         try:
             pps = pseudos.pseudo_with_symbol('N')
         except AttributeError:
@@ -74,6 +76,8 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
     nband = nband_calculation(element, configuration, pseudos)
     if element in ELEMENTS_INCLUDE_F_ELECTRONS:
         if configuration in UNARIE_CONFIGURATIONS and configuration != "Diamond":
+            nband = ceil(max(1.5 * nband, 20))
+        if configuration == "RE":
             nband = ceil(max(1.5 * nband, 20))
         else:
             nband = ceil(1.5 * nband)
@@ -116,15 +120,20 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nspden": 1,
         }
     elif precision == "LnN":
+        nupdown = LANTHANIDE_3[element]
         eos_settings = {
             "ecut": ecut,
             "nband": nband,
             "nstep": 100,
             "tsmear": 2.25e-3,
-            "toldfe": 5.0e-9 * natom,
+            "toldfe": 5.0e-11 * natom,
             "occopt": 3,
             "chkprim": 0,
             "chksymbreak": 0,
+            "spinmagntarget": nupdown,
+            # "constraint_kind": [3, 0],
+            # "spinat": [[0.0, 0.0, nupdown], [0.0, 0.0, 0.0]],
+            # "chksymtnons": 3,
             # "autoparal": 1,
             "nspinor": 1,
             "nsppol": 2,
@@ -159,6 +168,18 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "tsmear": 0.01,
             "tolvrs": 1e-8 * natom,
         }
+    elif precision == "hints":
+        eos_settings = {
+            "ecut": ecut,
+            "nband": nband,
+            "nstep": 100,
+            "nsppol": 1,
+            "nspinor": 1,
+            "nspden": 1,
+            "occopt": 4,
+            "tsmear": 0.01,
+            "toldfe": 1e-10 * natom,
+        }
     elif precision == "molecule":
         charge = {'X2O': -7, 'XO': -10, 'X2O3': -9, 'XO2': -12, 'X2O5': -7, 'XO3': -6}
         eos_settings = {
@@ -191,6 +212,8 @@ def eos_kpoints_generation(structure, precision='standard'):
     elif precision == 'molecule':
         kpoints_distance = 100
     elif precision == 'phonon':
+        kpoints_distance = 0.15
+    elif precision == 'hints':
         kpoints_distance = 0.15
     else:
         kpoints_distance = 0.5
