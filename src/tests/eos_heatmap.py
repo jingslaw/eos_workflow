@@ -13,9 +13,26 @@ from matplotlib.cm import ScalarMappable
 cmap = LinearSegmentedColormap.from_list(
     "ref_cmap",
     [
-        (0.0, "#0203BF"),
-        (0.33 / 1.65, "#ffff66"),
-        (1.0, "#cc0000"),
+        # (0.0, "#0203BF"),
+        # (0.33 / 1.65, "#ffff66"),
+        # (1.0, "#cc0000"),
+
+        (0.0, "#555998"),
+        (0.1, "#6B71AD"),
+        (0.33, "#EEE992"),
+        (1.00, "#F28C53"),
+
+        # (0.00, "#006837"),  # dark green
+        # (0.05, "#1a9850"),  # green
+        # (0.10, "#66bd63"),  # light green
+
+        # (0.17, "#d9ef8b"),  # yellow-green
+        # (0.27, "#fee08b"),  # yellow-orange
+        # (0.33, "#fdae61"),  # light orange
+
+        # (0.45, "#f46d43"),  # strong orange
+        # (0.65, "#e34a33"),  # orange-red
+        # (1.00, "#b30000"),  # dark red
     ],
 )
 
@@ -65,19 +82,21 @@ config_labels += [r"$\bar{\nu}_{\rm u}$", r"$\bar{\nu}_{\rm o}$", r"$\bar{\nu}_{
 # ============================================================
 # Plot
 # ============================================================
-fig, ax = plt.subplots(figsize=(9, 7), dpi=150, constrained_layout=True)
+fig, ax = plt.subplots(figsize=(6.0, 6.5), dpi=150, constrained_layout=True)
 
 # --- Keep GRID mapping unchanged (0 -> 1.65)
-vmax_phys = 1.65
-norm_img = Normalize(vmin=0.0, vmax=vmax_phys, clip=True)
-im = ax.imshow(eos_results, cmap=cmap, norm=norm_img)
+# vmax_phys = 1.65
+#vmax_phys = 1.00
+#norm_img = Normalize(vmin=0.0, vmax=vmax_phys, clip=True)
+im = ax.imshow(eos_results, cmap=cmap)
 
 # ============================================================
 # Colorbar that is 0.00 -> 1.00, with "over" values shown in red
 # ============================================================
 # We want 1.00 on the bar to correspond to the SAME color as data=1.00 in the grid.
 # In the grid, data=1.00 corresponds to colormap position 1.00/1.65.
-cut = 1.0 / vmax_phys  # ~0.606
+# cut = 1.0 / vmax_phys  # ~0.606
+cut = 1.0
 
 # Use only the [0, cut] portion of the original colormap so 1.00 becomes orange
 cmap_cb = truncate_cmap(cmap, 0.0, cut, name="ref_cmap_upto_1")
@@ -121,6 +140,6 @@ for i in range(len(LANTHANIDE_ELEMENTS)):
 
 ax.set_title(r"EOS discrepancy: $\nu$", fontsize=14)
 
-plt.savefig("eos-nu.pdf", bbox_inches="tight", pad_inches=0.02)
+plt.savefig("eos-nu.pdf", bbox_inches="tight", pad_inches=0.01)
 plt.show()
 

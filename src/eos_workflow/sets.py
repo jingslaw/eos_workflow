@@ -223,7 +223,7 @@ def eos_kpoints_generation(structure, precision='standard'):
     return eos_kpoints_settings
 
 
-def get_standard_structure(element, configuration):
+def get_standard_structure(element, configuration, xc="PBE"):
     # If for delta measure workflow
     base_structure_module = "eos_workflow.statics.structures"
 
@@ -237,16 +237,26 @@ def get_standard_structure(element, configuration):
     # For elements that are verified in nat.rev.phys.2024 paper, use the XSF files.
     # https://github.com/aiidateam/acwf-verification-scripts/tree/main/0-preliminary-do-not-run
     elif configuration in OXIDE_CONFIGURATIONS:
-        p_ctx = resources.path(
-            f"{base_structure_module}.oxides", f"{element}-{configuration}.xsf"
-        )
+        if xc == "PBE":
+            p_ctx = resources.path(
+                f"{base_structure_module}.oxides", f"{element}-{configuration}.xsf"
+            )
+        else:
+            p_ctx = resources.path(
+                f"{base_structure_module}.xsfs-oxides-verification-{xc}-v1", f"{element}-{configuration}.xsf"
+            )
     elif configuration in UNARIE_CONFIGURATIONS:
         # The xsf file named as E-Diamond.xsf
         if configuration == "DC":
             configuration = "Diamond"
-        p_ctx = resources.path(
-            f"{base_structure_module}.unaries", f"{element}-{configuration}.xsf"
-        )
+        if xc == "PBE":
+            p_ctx = resources.path(
+                f"{base_structure_module}.unaries", f"{element}-{configuration}.xsf"
+            )
+        else:
+            p_ctx = resources.path(
+                f"{base_structure_module}.xsfs-unaries-verification-{xc}-v1", f"{element}-{configuration}.xsf"
+            )
     else:
         raise ValueError(f"Unknown configuration {configuration}")
 

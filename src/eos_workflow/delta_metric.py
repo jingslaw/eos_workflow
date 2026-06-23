@@ -147,7 +147,7 @@ def rel_errors_vec_length(v0w, b0w, b1w, v0f, b0f, b1f, prefact=100, weight_b0=1
     return leng * prefact
 
 
-def load_ae_birch_murnaghan(element, configuration):
+def load_ae_birch_murnaghan(element, configuration, xc="PBE"):
     if configuration == "DC":
         configuration = "Diamond"
     if configuration == "RE":
@@ -158,10 +158,16 @@ def load_ae_birch_murnaghan(element, configuration):
         ref_json = "WIEN2K_GS.json"
         conf_key = f"{element}"
     elif configuration in UNARIE_CONFIGURATIONS:
-        ref_json = "AE-average-unaries.json"
+        if xc == 'PBE':
+            ref_json = "AE-average-unaries.json"
+        else:
+            ref_json = f"WiFlCP_avg_unaries_{xc.lower()}.json"
         conf_key = f"{element}-X/{configuration}"
     elif configuration in OXIDE_CONFIGURATIONS:
-        ref_json = "AE-average-oxides.json"
+        if xc == 'PBE':
+            ref_json = "AE-average-oxides.json"
+        else:
+            ref_json = f"WiFlCP_avg_oxides_{xc.lower()}.json"
         conf_key = f"{element}-{configuration}"
     else:
         print(f"{configuration} is not one of RE, GS, BCC, FCC, SC, Diamond, X2O, XO, X2O3, XO2, X2O5, XO3")
@@ -175,10 +181,11 @@ def load_ae_birch_murnaghan(element, configuration):
             data = json.load(handle)
     else:
         raise FileNotFoundError(f"File not found: {ae_eos_path}")
+    print(conf_key)
     return data["BM_fit_data"][conf_key]
 
 
-def metric_analyze(element, configuration, v0, b0, b1, natoms):
+def metric_analyze(element, configuration, v0, b0, b1, natoms, xc="PBE"):
     """
     The calcfunction calculate the metric factor.
     return delta factor with unit (eV/atom)
@@ -203,7 +210,7 @@ def metric_analyze(element, configuration, v0, b0, b1, natoms):
     conf_key is key in json file for configurations of every element.
     """
 
-    bm_fit = load_ae_birch_murnaghan(element, configuration)
+    bm_fit = load_ae_birch_murnaghan(element, configuration, xc=xc)
     ref_v0, ref_b0, ref_b1 = (
         bm_fit["min_volume"],
         bm_fit["bulk_modulus_ev_ang3"],

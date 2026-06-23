@@ -26,7 +26,7 @@ from atomate2.abinit.sets.core import StaticSetGenerator
 
 from eos_workflow.acwf_response import AcwfPhononResponseMaker
 from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eos_input_generation
-from eos_workflow.utilities import ATOM_NUMBERS_IN_CONFIG
+from eos_workflow.utilities import ATOM_NUMBERS_IN_CONFIG, ELEMENTS_INCLUDE_F_ELECTRONS
 
 
 @job
@@ -428,11 +428,14 @@ class PhononConvergencyMaker(AcwfPhononMaker):
     run_mrgdv: bool = False
 
 
-def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None):
+def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None, xc="PBE"):
     from copy import deepcopy
     if not ecuts:
-        ecuts = [50, 60, 70, 80, 90, 100, 125, 150]
-    structure = get_standard_structure(element, configuration)
+        if element in ELEMENTS_INCLUDE_F_ELECTRONS:
+            ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
+        else:
+            ecuts = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+    structure = get_standard_structure(element, configuration, xc=xc)
     phonon_results = {
         "element": element,
         "configuration": configuration,
@@ -479,4 +482,4 @@ def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt
                 phonon_results[f"ecut-{ecut}"] = job.output
     print_jobs = write_to_file(phonon_results)
     phonon_jobs.append(print_jobs)
-    return Flow(phonon_jobs, name="Phonon convergency workflow", output=phonon_results)
+    return Flow(phonon_jobs, name=f"{element} phonon converge", output=phonon_results)

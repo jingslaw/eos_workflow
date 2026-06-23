@@ -304,6 +304,7 @@ def eos_delta_calculation(
     element: str,
     configuration: str,
     volume_energy_results: dict,
+    xc: str,
 ):
     flag = volume_energy_results["eos_is_converged"]
     result = deepcopy(volume_energy_results)
@@ -317,7 +318,7 @@ def eos_delta_calculation(
         num = volume_energy_results["num_of_atoms"]
         e0 = fitting_results["energy0"]
         result.update({"energy0": e0})
-        eos_results = metric_analyze(element, configuration, v0, b0, b1, num)
+        eos_results = metric_analyze(element, configuration, v0, b0, b1, num, xc)
         print(eos_results)
         result.update(eos_results)
     return result
@@ -340,7 +341,7 @@ def generate_abinit_inputs(element, configuration, ecut, pseudos, structure, pre
     return abinit_inputs
 
 
-def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None, precision='standard'):
+def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None, precision='standard', xc="PBE"):
     """
     :param element: str, the name of element
     :param configuration: str, it should be one of the config in
@@ -350,13 +351,14 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
     :param volume_scaling_list: the scaling factors, [0.94, 0.96, 0.98, 1.00, 1.02, 1.04, 1.06] by default
     :param precision: tag "standard" provides the abinit inputs as same as aiida-common workflow,
     tag "test" provides a test to this jobflow in a lower precision
+    :param xc: testing xc
     :return:
     """
     eos_jobflow = []
     if volume_scaling_list is None:
         volume_scaling_list = [0.94, 0.96, 0.98, 1.00, 1.02, 1.04, 1.06]
 
-    structure = get_standard_structure(element, configuration)
+    structure = get_standard_structure(element, configuration, xc=xc)
     inputs_job = generate_abinit_inputs(element, configuration, ecut, pseudos, structure, precision=precision)
 
     eos_jobs = parallel_eos_calculation(
@@ -379,7 +381,7 @@ def eos_workflow(element, configuration, ecut, pseudos, volume_scaling_list=None
         volume_scaling_list=volume_scaling_list.copy()
     )
     eos_jobflow.append(wfk_job)
-    delta_job = eos_delta_calculation(element, configuration, wfk_job.output)
+    delta_job = eos_delta_calculation(element, configuration, wfk_job.output, xc)
     eos_jobflow.append(delta_job)
     write_job = export_single_workflow(element, configuration, delta_job.output)
     eos_jobflow.append(write_job)

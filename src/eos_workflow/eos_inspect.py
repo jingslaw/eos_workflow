@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from math import ceil
 from eos_workflow.delta_metric import birch_murnaghan_function, load_ae_birch_murnaghan
 from eos_workflow.workflows import sum_up
+from eos_workflow.utilities import ACWF_CONFIGURATIONS
 from jobflow_remote import get_jobstore
 from abipy.tools.plotting import add_fig_kwargs
 
@@ -125,6 +126,11 @@ def eos_inspect(filepath="eos_fitting_results.json"):
     with open(filepath, 'r') as fp:
         eos_results = json.load(fp)
     for element, results in eos_results.items():
+        try:
+            results.pop("basename")
+            results.pop("pseudolib")
+        except KeyError:
+            pass
         rows = ceil(len(results) / 2)
         fig, axs = plt.subplots(rows, 2, figsize=(8.27, 11.69), dpi=100)
         i = 0

@@ -3,13 +3,13 @@ from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eo
 from jobflow_remote import submit_flow, set_run_config
 from jobflow import run_locally
 
-element = "Cm"
-# ecuts = [10, 20, 30, 40, 80, 100]
-# ecuts = [60]
-# ecuts = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
-ecuts = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
+element = "Na"
+ecuts = [15, 50, 80, 100]
+# ecuts = None
+# ecuts = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+# ecuts = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
 configuration = 'FCC'
-pseudo = "ONCVPSP-PBE-SR-PDv1.0:standard"
+pseudo = "ONCVPSP-PBE-SR-PDv0.6:standard"
 structure = get_standard_structure(element, configuration)
 jobs = phonon_convergency_workflow(
     element,

@@ -4,9 +4,10 @@ import numpy as np
 
 from eos_workflow.eos_workflow import eos_workflow
 from eos_workflow.sets import EosDoc
-from eos_workflow.utilities import ACWF_CONFIGURATIONS, ELEMENTS_INCLUDE_F_ELECTRONS
+from eos_workflow.utilities import ACWF_CONFIGURATIONS
 from eos_workflow.delta_metric import birch_murnaghan_fit
-from jobflow import Flow, job
+from jobflow import Flow, job, Response
+from atomate2.abinit.sets.base import as_pseudo_table
 
 
 def sum_up(workflow_outputs, num_of_volumes=None) -> EosDoc:
@@ -127,12 +128,15 @@ def eos_workflows(
     pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
     configurations: str | list[str] | None = None,
     volume_scaling_list: list[float] | None = None,
-    precision: str = 'standard'
+    precision: str = 'standard',
+    xc: str = 'PBE',
 ):
     if configurations is None:
         configurations = ACWF_CONFIGURATIONS
     if isinstance(configurations, str):
         configurations = [configurations]
+    pseudo_table = as_pseudo_table(pseudos)
+    basename = pseudo_table.pseudo_with_symbol(element).basename
     workflows = []
     outputs = {}
     for configuration in configurations:
@@ -142,75 +146,12 @@ def eos_workflows(
             ecut,
             pseudos,
             volume_scaling_list=volume_scaling_list,
-            precision=precision
+            precision=precision,
+            xc=xc,
         )
         workflows.append(workflow)
         outputs.update({configuration: workflow.output})
+        outputs.update({"basename": basename, "pseudolib": pseudos})
     flow = Flow(workflows, output={element: outputs})
     return Flow([flow, export_result(flow.output)], name=f"eos-{element}")
 
-
-@job
-def converge_results(element, configuration, ecuts, pseudos, outputs, print_raw=True):
-    results = {
-        "element": element,
-        "configuration": configuration,
-        "pseudos": pseudos,
-    }
-    ref = None
-    i = 0
-    for output in outputs:
-        tmp = {
-            "eos_is_converged": False,
-            'nu': None,
-            'delta/natoms': None,
-            'delta1': None,
-            'v0_b0_b1': None,
-        }
-        if output["eos_is_converged"]:
-            tmp['nu'] = output["rel_errors_vec_length"]
-            tmp['delta/natoms'] = output["delta/natoms"]
-            tmp['eos_is_converged'] = output["eos_is_converged"]
-            tmp['v0_b0_b1'] = output["birch_murnaghan_results"]
-            ref = output["reference_ae_V0_B0_B1"]
-        results.update({f'ecut-{ecuts[i]}': tmp})
-        i += 1
-    results.update(
-        {"reference_ae_V0_B0_B1": ref,
-         "delta/natoms unit": "meV/natoms"}
-    )
-    if print_raw is True:
-        results.update({"raw": outputs})
-    return results
-
-
-def eos_converge_workflows(
-    element: str,
-    configuration: str,
-    ecuts: list[float] | None = None,
-    pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
-    volume_scaling_list: list[float] | None = None,
-    precision: str = 'standard'
-):
-    if ecuts is None:
-        if element in ELEMENTS_INCLUDE_F_ELECTRONS:
-            ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
-        else:
-            ecuts = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
-    workflows = []
-    outputs = []
-    for ecut in ecuts:
-        workflow = eos_workflow(
-            element,
-            configuration,
-            ecut,
-            pseudos,
-            volume_scaling_list=volume_scaling_list,
-            precision=precision
-        )
-        workflows.append(workflow)
-        outputs.append(workflow.output)
-    flow = Flow(workflows, output=outputs)
-    result = converge_results(element, configuration, ecuts, pseudos, flow.output)
-    return Flow([flow, result, export_result(result.output, file_name="eos_converge_results.json")],
-                name=f"eos-converge-{element}")
