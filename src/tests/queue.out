@@ -1,5 +1,0 @@
-eos_check
-
-WARNING: The behavior of eos curve is bad.
-
-{'num_of_atoms': 1, 'volume_unit': 'A^3', 'energy_unit': 'eV', 'volumes': [26.12590151316346, 24.558347423444978, 25.080865453664416, 25.603383484035902, 26.648419544984968, 27.170937575519563, 27.693455604748024], 'energies': [-2733.9175701783483, -2733.9398110988136, -2733.9467699398497, -2733.954701420055, -2733.9206104585164, -2733.921831574687, -2733.92158644842], 'scaling_factors': [1.0, 0.94, 0.96, 0.98, 1.02, 1.04, 1.06], 'eta_min': 0.98, 'eos_is_converged': False, 'eos_failed_problems': '\nWARNING: The behavior of eos curve is bad.\n'}
