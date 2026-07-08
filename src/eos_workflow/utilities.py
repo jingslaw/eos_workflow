@@ -104,6 +104,8 @@ class OncvpspInput(object):
                         if lines[j].startswith('#'):
                             break
                         substrings = lines[j].split()
+                        if len(substrings) > 3:
+                            substrings = substrings[0:3]
                         values = [float(substring) if '.' in substring else int(substring) for substring in substrings]
                         if len(values) != len(header[1:].split()):
                             print('ERROR: line{0}: {1} needs {2} parameters but only {3} input found'

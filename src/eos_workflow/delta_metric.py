@@ -100,7 +100,7 @@ def eos_coefficients(v0, b0, b1):
 def calc_delta(v0f, b0f, b1f, v0w, b0w, b1w, useasymm=False):
     # delta is calculated by Equation 1 in reference DOI: 10.1126/science.aad3000
 
-    vref = 30.0
+    vref = 30.0 * 0.5291772105 ** 3.0
     bref = 100.0 * 10.0 ** 9.0 / 1.602176565e-19 / 10.0 ** 30.0
 
     if useasymm:
