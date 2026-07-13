@@ -182,7 +182,7 @@ jf project list
 and we will see a project named eos_workflow in green. If that "eos_workflow" is white, you need to modify your jobflow_remote settings.
 
 #### iv. submit a remote flow
-Here is an example in eos_workflow/src/tests/
+Here is an example in eos_workflow/src/tests/. You can directly run it at your own PC, and jobflow_remote will help you to submit this workflow to the remote cluster.
 ```
 python submit_remote.py
 ```
