@@ -143,7 +143,14 @@ python run_locally.py
 ```
 Many folders will create to store calculation files and final results.
 You will find a file named "eos_fitting_results.json" at the last created folder. If everything is fine, the result is like "eos curve is bad". \
-This is what we expect, because we use a very small ecut as testing the workflow here.  
+This is what we expect, because we use a very small ecut as testing the workflow here.\  
+
+Then, we use eos_workflow/src/tests/plot_test.py to visualize the eos results obtain in eos_fitting_results.json
+```
+python plot_test.py
+```
+The dash curve corresponds to EOS of all-electron results, and the blue points are results of pseudopotentails.\
+The defination of EOS can be referred from Ref: E. Bosoni et al., How to verify the precision of density-functional-theory implementations via reproducible and universal workflows, Nat. Rev. Phys. 6, 45-58 (2024)
 
 ### run the workflow on a remote cluster
 
