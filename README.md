@@ -208,5 +208,5 @@ jf job info DB_id
 ```
 The value of run_dir corresponds to the location of this job.
 
-##ADVANCED FUNCTION
+## ADVANCED FUNCTION
 This eos_workflow also include some workflows to test the convergency behavior like Etot, delta1, phonon vs ecut.\ And also some visualized functions. More details can refer to:.
