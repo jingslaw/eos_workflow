@@ -149,7 +149,7 @@ This is what we expect, because we use a very small ecut as testing the workflow
 
 There are two ways to realize it: \
 a. run the workflow locally on the remote cluster.\
-In this case, you need to write a bash script to correctly submit your job to the calculation node rather than your home node.\
+In this case, you need first install eos_workflow at the remote cluster. Then, write a bash script to correctly submit your job to the calculation node rather than your home node.\
 In that bash script, you could still use something like "python run_locally.py"\
 
 b. run the workflow locally on your own PC, and let jobflow remote submit it to the cluster\
@@ -173,16 +173,18 @@ In addition, file ~/.jfremote.yaml should be created. \
 ```
 project: eos_workflow
 ```
+#### iv. manage your jobflow-remote configure file
 Finally, create and configure the eos_workflow.yaml file
 in the folder ~/.jfremote
 
+An example of eos_workflow.yaml is in eos_workflow/src/tests/. \
 If this file is correctly configured, type the following line
 ```
 jf project list
 ```
 and we will see a project named eos_workflow in green. If that "eos_workflow" is white, you need to modify your jobflow_remote settings.
 
-#### iv. submit a remote flow
+#### v. submit a remote flow
 Here is an example in eos_workflow/src/tests/. You can directly run it at your own PC, and jobflow_remote will help you to submit this workflow to the remote cluster.
 ```
 python submit_remote.py
