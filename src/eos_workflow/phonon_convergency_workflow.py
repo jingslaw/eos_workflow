@@ -29,6 +29,9 @@ from eos_workflow.sets import get_standard_structure, eos_kpoints_generation, eo
 from eos_workflow.utilities import ATOM_NUMBERS_IN_CONFIG, ELEMENTS_INCLUDE_F_ELECTRONS
 
 
+XC = ['LDA', 'PBE', 'PBEsol']
+
+
 @job
 def parse_phonon_files(prev_outputs):
     result = []
@@ -428,8 +431,15 @@ class PhononConvergencyMaker(AcwfPhononMaker):
     run_mrgdv: bool = False
 
 
-def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None, xc="PBE"):
+def phonon_convergency_workflow(element, configuration, pseudos, ecuts=None, qpt_list=None, xc=None):
     from copy import deepcopy
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
     if not ecuts:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
             ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]

@@ -118,6 +118,7 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             "nspinor": 1,
             "nsppol": 1,
             "nspden": 1,
+            "spinat": None
         }
     elif precision == "LnN":
         nupdown = LANTHANIDE_3[element]
@@ -197,7 +198,7 @@ def eos_input_generation(element, configuration, ecut, pseudos, precision='stand
             'charge': charge[configuration]
         }
     else:
-        eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "nspinor": 1, "nsppol": 1, "nspden": 1}
+        eos_settings = {"ecut": ecut, "nband": nband, "nstep": 100, "nspinor": 1, "nsppol": 1, "nspden": 1, "spinat": None}
     return eos_settings
 
 

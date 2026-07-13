@@ -1,0 +1,117 @@
+name: eos_workflow
+base_dir: ~/.jfremote/eos_workflow
+tmp_dir: ~/.jfremote/eos_workflow/tmp
+log_dir: ~/.jfremote/eos_workflow/log
+daemon_dir: ~/.jfremote/eos_workflow/daemon
+log_level: debug
+runner:
+  delay_checkout: 30
+  delay_check_run_status: 30
+  delay_advance_status: 30
+  delay_refresh_limited: 600
+  delay_update_batch: 60
+  lock_timeout: 86400
+  delete_tmp_folder: true
+  max_step_attempts: 3
+  delta_retry:
+  - 30
+  - 300
+  - 1200
+workers:
+  lucia:
+    type: remote
+    scheduler_type: slurm
+    work_dir: /gpfs/scratch/acad/batwal/wjing/jobflow
+    resources: {'account': 'batwal', 'partition': 'batch', 'ntasks_per_node': 128, 'mem_per_cpu': 1920}
+    pre_run: source /gpfs/home/acad/ucl-modl/wjing/.bashrc; ulimit -s unlimited; conda activate jobflow; export I_MPI_FABRICS=shm; export MKL_NUM_THREADS=1; export OMP_NUM_THREADS=1;
+    post_run:
+    timeout_execute: 60
+    max_jobs:
+    batch:
+    host: frontal.lucia.cenaero.be
+    user: wjing
+    port:
+    password:
+    key_filename:
+    passphrase:
+    gateway:
+    forward_agent:
+    connect_timeout:
+    connect_kwargs:
+    inline_ssh_env:
+    keepalive: 60
+    shell_cmd: bash
+    login_shell: true
+    interactive_login: false
+  lucia_frontend:
+    type: remote
+    scheduler_type: shell
+    work_dir: /gpfs/scratch/acad/batwal/wjing/jobflow
+    pre_run: source /gpfs/home/acad/ucl-modl/wjing/.bashrc; conda activate jobflow;
+    post_run:
+    timeout_execute: 60
+    max_jobs:
+    batch:
+    host: frontal.lucia.cenaero.be
+    user: wjing
+    port:
+    password:
+    key_filename:
+    passphrase:
+    gateway:
+    forward_agent:
+    connect_timeout:
+    connect_kwargs:
+    inline_ssh_env:
+    keepalive: 60
+    shell_cmd: bash
+    login_shell: true
+    interactive_login: false
+  local:
+    type: local
+    scheduler_type: shell
+    work_dir: /home/wjing/programs/jobflow
+    resources:
+    pre_run:
+    post_run:
+    timeout_execute: 60
+    max_jobs:
+    batch:
+queue:
+  store:
+    type: MongoStore
+    host: <<HOSTNAME>>
+    database: <<DATABASE>>
+    username: <<USER>>
+    password: <<PASSWORD>>
+    collection_name: jobs
+  flows_collection: flows
+  auxiliary_collection: jf_auxiliary
+  db_id_prefix:
+exec_config:
+  example_config:
+    modules:
+    export:
+      PATH:
+    pre_run:
+    post_run:
+jobstore:
+  docs_store:
+    type: MongoStore
+    database: <<DATABASE>>
+    host: <<HOSTNAME>>
+    port: <<PORT>>
+    username: <<USER>>
+    password: <<PASSWORD>>
+    collection_name: outputs
+  additional_stores:
+    data:
+      type: GridFSStore
+      database: <<DATABASE>>
+      host: <<HOSTNAME>>
+      port: <<PORT>>
+      username: <<USER>>
+      password: <<PASSWORD>>
+      collection_name: outputs_blobs
+remote_jobstore:
+metadata:

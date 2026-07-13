@@ -10,6 +10,9 @@ from jobflow import Flow, job, Response
 from atomate2.abinit.sets.base import as_pseudo_table
 
 
+XC = ['LDA', 'PBE', 'PBEsol']
+
+
 def sum_up(workflow_outputs, num_of_volumes=None) -> EosDoc:
     eos_result = EosDoc()
     warning_lines = []
@@ -129,8 +132,16 @@ def eos_workflows(
     configurations: str | list[str] | None = None,
     volume_scaling_list: list[float] | None = None,
     precision: str = 'standard',
-    xc: str = 'PBE',
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     if configurations is None:
         configurations = ACWF_CONFIGURATIONS
     if isinstance(configurations, str):

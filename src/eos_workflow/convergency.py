@@ -20,6 +20,9 @@ from eos_workflow.workflows import eos_workflow, export_result
 logger = logging.getLogger(__name__)
 
 
+XC = ['LDA', 'PBE', 'PBEsol']
+
+
 @job
 def write_to_file(results: str, fname="output.txt"):
     with open(fname, 'w') as fp:
@@ -87,8 +90,16 @@ def convergency_workflows(
     pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
     precision: str = 'hints',
     prev_results: dict | None = None,
-    xc: str = "PBE"
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     structure = get_standard_structure(element, configuration, xc=xc)
     if ecuts is None:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
@@ -192,8 +203,16 @@ def decorate_convergency_workflows(
     pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
     precision: str = 'hints',
     prev_results: dict | None = None,
-    xc: str = "PBE"
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     flow = convergency_workflows(
         element=element,
         configuration=configuration,
@@ -213,8 +232,15 @@ def etot_convergency_workflows(
     pseudos: str = "ONCVPSP-PBE-SR-PDv0.4:standard",
     precision: str = 'hints',
     thresholds: dict | None = None,
-    xc: str = "PBE"
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
 
     if ecuts is None:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
@@ -312,8 +338,16 @@ def eos_converge_workflows(
     volume_scaling_list: list[float] | None = None,
     precision: str = 'standard',
     prev_results: dict | None = None,
-    xc: str = "PBE",
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     if ecuts is None:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
             ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]
@@ -353,8 +387,16 @@ def decorate_eos_convergency_workflow(
     volume_scaling_list: list[float] | None = None,
     precision: str = 'standard',
     prev_results: dict | None = None,
-    xc: str = "PBE",
+    xc: str | None = None,
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     flow = eos_converge_workflows(
         element=element,
         configuration=configuration,
@@ -435,8 +477,16 @@ def eos_convergency_workflows(
     volume_scaling_list: list[float] | None = None,
     precision: str = 'standard',
     thresholds: dict | None = None,
-    xc: str = "PBE"
+    xc: str | None = None
 ):
+    if xc is None:
+        xc = pseudos.split('-')[1]
+        if xc.upper() in XC:
+            pass
+        else:
+            print(f'ERROR: UNKNOWN XC format: {xc}')
+            exit(-1)
+
     if ecuts is None:
         if element in ELEMENTS_INCLUDE_F_ELECTRONS:
             ecuts = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150]

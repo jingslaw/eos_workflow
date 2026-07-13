@@ -15,8 +15,8 @@ os.environ["PATH"] = (
 
 pseudos = "ONCVPSP-LDA-SR-PDv0.6:standard"
 
-element = 'O'
-high = 10
+element = 'Mn'
+high = 40
 # configurations = ['XO', 'XO2', 'XO3', 'X2O', 'X2O3', 'X2O5']
 # configurations = ['BCC', 'FCC', 'SC', 'Diamond']
 small_config = ['BCC', 'Diamond', 'XO', 'XO2', 'XO3', 'X2O']
@@ -27,7 +27,6 @@ for ecut in [high]:
                         precision="debug",
                         volume_scaling_list=[0.94, 0.98, 1.00, 1.02, 1.06],
                         configurations=configurations,
-                        # xc="LDA"
                         )
     """eos = set_run_config(eos, name_filter="eos_check", worker="manneback_frontend")
     eos = set_run_config(eos, name_filter="eos_delta_calculation", worker="manneback_frontend")

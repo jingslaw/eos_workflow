@@ -147,7 +147,7 @@ def rel_errors_vec_length(v0w, b0w, b1w, v0f, b0f, b1f, prefact=100, weight_b0=1
     return leng * prefact
 
 
-def load_ae_birch_murnaghan(element, configuration, xc="PBE"):
+def load_ae_birch_murnaghan(element, configuration, xc):
     if configuration == "DC":
         configuration = "Diamond"
     if configuration == "RE":
@@ -185,7 +185,7 @@ def load_ae_birch_murnaghan(element, configuration, xc="PBE"):
     return data["BM_fit_data"][conf_key]
 
 
-def metric_analyze(element, configuration, v0, b0, b1, natoms, xc="PBE"):
+def metric_analyze(element, configuration, v0, b0, b1, natoms, xc):
     """
     The calcfunction calculate the metric factor.
     return delta factor with unit (eV/atom)
