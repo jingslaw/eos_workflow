@@ -42,7 +42,7 @@ cd config
 The next step is to setting three configure files.
 
 #### i. configure setting files
-1. manager.yml
+1. manager.yml \
 abipy configuration file, usually store at "$HOME/.abinit/abipy". More details please referr to their website \
 a template is here
 ```
@@ -66,7 +66,7 @@ qadapters:
          mem_per_node: 4 Gb
 ```
 
-2. atomate2.yaml
+2. atomate2.yaml \
 a template as follows.
 ```
 # ABINIT
@@ -80,8 +80,8 @@ Notice:\
 ABINIT_MPIRUN_CMD is only required when you use mpi to run abinit, if not, just delete it.\
 ABINIT_ABIPY_MANAGER_FILE show the manager.yml required by Abipy
 
-3. jobflow.yaml
-Here is a template. <<DB_NAME>>, <<HOSTNAME>>, <<PORT>>, <<USERNAME>>, and <<PASSWORD>> should be replaced by your own MongoDB
+3. jobflow.yaml \
+Here is a template. \<\<DB_NAME\>\>, \<\<HOSTNAME\>\>, <<PORT>>, <<USERNAME>>, and <<PASSWORD>> should be replaced by your own MongoDB
 ```
 JOB_STORE:
   docs_store:
