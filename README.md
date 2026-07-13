@@ -29,7 +29,7 @@ Details can be referred to the website of abipy
 conda activate jobflow
 pip show atomate2
 ```
-You will obtain the path to atomate2: PATH_TO_ATOMATE2, like "/home/wjing/miniconda3/envs/phonon/lib/python3.10/site-packages".
+You will obtain the path to atomate2: PATH_TO_ATOMATE2, like "/home/wjing/miniconda3/envs/phonon/lib/python3.10/site-packages". \
 Then
 ```
 cd PATH_TO_ATOMATE2/atomate2
@@ -43,7 +43,7 @@ vim jobflow.yaml
 ```
 
 #### i. configure setting files
-manager.yml, abipy configuration file, usually store at $HOME/.abinit/abipy, more details please referr to their website
+manager.yml, abipy configuration file, usually store at "$HOME/.abinit/abipy". More details please referr to their website \
 a template is here
 ```
 qadapters:
