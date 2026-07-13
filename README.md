@@ -81,7 +81,7 @@ ABINIT_MPIRUN_CMD is only required when you use mpi to run abinit, if not, just 
 ABINIT_ABIPY_MANAGER_FILE show the manager.yml required by Abipy
 
 3. jobflow.yaml \
-Here is a template. \<\<DB_NAME\>\>, \<\<HOSTNAME\>\>, <<PORT>>, <<USERNAME>>, and <<PASSWORD>> should be replaced by your own MongoDB
+Here is a template. \<\<DB_NAME\>\>, \<\<HOSTNAME\>\>, \<\<PORT\>\>, \<\<USERNAME\>\>, and \<\<PASSWORD\>\> should be replaced by your own MongoDB
 ```
 JOB_STORE:
   docs_store:
@@ -115,6 +115,20 @@ then:
 ```
 source ~/.bashrc
 ```
+## Install Pseudopotentials
+We use abipy to install pseudopotentials.\
+The following line will show some avialiable pseudopotential families.
+```
+abips.py avail
+```
+Then we choose "ONCVPSP-PBE-SR-PDv0.4" as an example to install it. 
+```
+abips.py install ONCVPSP-PBE-SR-PDv0.4
+```
+ONCVPSP means pseudopotentials are norm-conserving. 
+PBE is the type of exchange-correlation functional. SR means the pesudopotentials are scalar-relativistic.
+v0.4 is the version of this pseudopotentials family.
+
 
 ## An Example for O.psp8
 An example is in eos_workflow/src/tests/ \
@@ -126,10 +140,22 @@ PseudoTable, which installed in abipy:
 ```
 python run_locally.py
 ```
+Many folders will create to store calculation files and final results.
+You will find a file named "eos_fitting_results.json" at the last created folder. If everything is fine, the result is like "eos curve is bad". \
+This is what we expect, because we use a very small ecut as testing the workflow here.  
 
 ### run the workflow on a remote cluster
 
+There are two ways to realize it: \
+a. run the workflow locally on the remote cluster.\
+In this case, you need to write a bash script to correctly submit your job to the calculation node rather than your home node.\
+In that bash script, you could still use something like "python run_locally.py"\
+
+b. run the workflow locally on your own PC, and let jobflow remote submit it to the cluster\
+In this case, we run workflows directly on our local PC.
+
 #### i. install eos_workflow package on the remote cluster
+same steps as above to install eos_workflow, set configure files on cluster
 #### ii. install eos_workflow package on PC
 #### iii. install jobflow_remote package on PC
 When eos_workflow is installed on conda env jobflow, we
@@ -149,7 +175,14 @@ project: eos_workflow
 Finally, create and configure the eos_workflow.yaml file
 in the folder ~/.jfremote
 
-If this file is correctly configured, we have
+If this file is correctly configured, type the following line
+```
+jf project list
+```
+and we will see a project named eos_workflow in green. If that "eos_workflow" is white, you need to modify your jobflow_remote settings.
+
+#### iv. submit a remote flow
+Here is an example in eos_workflow/src/tests/
 ```
 python submit_remote.py
 ```
