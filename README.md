@@ -38,12 +38,12 @@ and create a folder to store configuration files
 ```
 mkdir config
 cd config
-vim atomate2.yaml
-vim jobflow.yaml
 ```
+The next step is to setting three configure files.
 
 #### i. configure setting files
-manager.yml, abipy configuration file, usually store at "$HOME/.abinit/abipy". More details please referr to their website \
+1. manager.yml
+abipy configuration file, usually store at "$HOME/.abinit/abipy". More details please referr to their website \
 a template is here
 ```
 qadapters:
@@ -66,10 +66,8 @@ qadapters:
          mem_per_node: 4 Gb
 ```
 
-atomate2.yaml
+2. atomate2.yaml
 a template as follows.
-ABINIT_MPIRUN_CMD is only required when you use mpi to run abinit, if not, just delete it.
-ABINIT_ABIPY_MANAGER_FILE show the manager.yml required by Abipy
 ```
 # ABINIT
 ABINIT_MPIRUN_CMD: "mpirun"
@@ -78,8 +76,11 @@ ABINIT_MRGDDB_CMD: PATH_TO/src/98_main/mrgddb
 ABINIT_ANADDB_CMD: PATH_TO/src/98_main/anaddb
 ABINIT_ABIPY_MANAGER_FILE: $HOME/.abinit/abipy/manager.yml
 ```
+Notice:\
+ABINIT_MPIRUN_CMD is only required when you use mpi to run abinit, if not, just delete it.\
+ABINIT_ABIPY_MANAGER_FILE show the manager.yml required by Abipy
 
-jobflow.yaml
+3. jobflow.yaml
 Here is a template. <<DB_NAME>>, <<HOSTNAME>>, <<PORT>>, <<USERNAME>>, and <<PASSWORD>> should be replaced by your own MongoDB
 ```
 JOB_STORE:
