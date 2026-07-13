@@ -15,6 +15,7 @@ conda activate jobflow
 ```
 pip install .
 ```
+If you meet any problem during the installation, a CONDA environment file environment.yml is stored in eos_workflow/src/tests/, you can rebuild the same environment based on this settings. 
 
 ## Basical settings
 
