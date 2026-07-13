@@ -157,7 +157,7 @@ The defination of EOS can be referred from Ref: E. Bosoni et al., How to verify 
 There are two ways to realize it: \
 a. run the workflow locally on the remote cluster.\
 In this case, you need first install eos_workflow at the remote cluster. Then, write a bash script to correctly submit your job to the calculation node rather than your home node.\
-In that bash script, you could still use something like "python run_locally.py"\
+In that bash script, you could still use something like "python run_locally.py"
 
 b. run the workflow locally on your own PC, and let jobflow remote submit it to the cluster\
 In this case, we run workflows directly on our local PC.
@@ -200,3 +200,13 @@ The submitted jobs can be referred by:
 ```
 jf job list
 ```
+
+#### vi. download and parse eos results
+If the eos calculation is finished, you will find the state of job named "export_result" is COMPLETED.\ Then, you can use the DB id of export_result to search the location of the final eos_fitting_results.json file:
+```
+jf job info DB_id
+```
+The value of run_dir corresponds to the location of this job.
+
+##ADVANCED FUNCTION
+This eos_workflow also include some workflows to test the convergency behavior like Etot, delta1, phonon vs ecut.\ And also some visualized functions. More details can refer to:.
