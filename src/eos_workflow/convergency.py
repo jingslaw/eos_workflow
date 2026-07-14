@@ -418,21 +418,19 @@ def get_eos_hints(data, thresholds):
     )
     ecut = []
     delta1 = []
-    v0_b0_b1 = []
+    v0_b0_b1 = data["reference_ae_V0_B0_B1"]
     for k in ecut_keys:
         if not isinstance(data[k]["delta/natoms"], float):
             continue
         ecut.append(float(k.split("-")[1]))
         delta1.append(data[k]["delta/natoms"])
-        v0_b0_b1.append(data[k]["v0_b0_b1"])
 
     ecut = np.array(ecut)
     delta1 = np.array(delta1)
-    v0_b0_b1 = np.array(v0_b0_b1)
 
-    v0 = v0_b0_b1[:, 0]
-    b0 = v0_b0_b1[:, 1]
-    # delta1 (delta_prime) = v0_ref * b0_ref / (v0 * b0), where v0_ref = 30 bohr^3, b0_ref = 100 Gpa.
+    v0 = v0_b0_b1[0]
+    b0 = v0_b0_b1[1]
+    # delta1 (delta_prime) = v0_ref * b0_ref / (v0_AE * b0_AE), where v0_ref = 30 bohr^3, b0_ref = 100 Gpa.
     # so, 2.7747 is the multiple of v0_ref * b0_ref with a unit transform from bohr^3 * Gpa to eV
     delta1 = delta1 * 2.7747 / (v0 * b0)
 

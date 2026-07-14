@@ -224,7 +224,7 @@ def metric_analyze(element, configuration, v0, b0, b1, natoms, xc):
     }
     # Delta computation
     try:
-        delta, deltarel, delta1 = calc_delta(v0, b0, b1, ref_v0, ref_b0, ref_b1)
+        delta, deltarel, delta1 = calc_delta(v0, b0, b1, ref_v0, ref_b0, ref_b1, useasymm=True)
     except Exception:
         pass
     else:
